@@ -9,7 +9,5 @@ func _ready():
 	$OQ_UILabel.set_label_text(info_text);
 	pass
 
-
-
 func glidergo():
 	pass # Replace with function body.
