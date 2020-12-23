@@ -26,7 +26,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="OQ_Networking_Demo"
+config/name="VR_HangGlider"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
@@ -36,7 +36,7 @@ vr="*res://OQ_Toolkit/vr_autoload.gd"
 
 [gdnative]
 
-singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
+singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
 
 [rendering]
 
