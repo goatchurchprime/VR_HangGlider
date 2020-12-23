@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=30 format=2]
 
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin.tscn" type="PackedScene" id=1]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVRCamera.tscn" type="PackedScene" id=2]
@@ -16,7 +16,6 @@
 [ext_resource path="res://assets/glider1/glider1.gd" type="Script" id=14]
 [ext_resource path="res://assets/glider2/HG_graphic_model.glb" type="PackedScene" id=15]
 [ext_resource path="res://gliderkinematics.gd" type="Script" id=16]
-[ext_resource path="res://Cube.gd" type="Script" id=17]
 [ext_resource path="res://gliderpos.gd" type="Script" id=18]
 
 [sub_resource type="PlaneMesh" id=1]
@@ -32,37 +31,36 @@ noise = SubResource( 2 )
 albedo_color = Color( 0.945098, 0.639216, 0.286275, 1 )
 albedo_texture = SubResource( 3 )
 
-[sub_resource type="PlaneMesh" id=11]
+[sub_resource type="PlaneMesh" id=5]
 size = Vector2( 500, 50 )
 
-[sub_resource type="SpatialMaterial" id=12]
+[sub_resource type="SpatialMaterial" id=6]
 albedo_color = Color( 0.945098, 0.639216, 0.286275, 1 )
 albedo_texture = SubResource( 3 )
 uv1_scale = Vector3( 10, 1, 1 )
 
-[sub_resource type="SpatialMaterial" id=9]
+[sub_resource type="SpatialMaterial" id=7]
 albedo_color = Color( 0.286275, 0.835294, 0.945098, 1 )
 albedo_texture = SubResource( 3 )
 uv1_scale = Vector3( 10, 10, 1 )
 
-[sub_resource type="PlaneMesh" id=10]
-material = SubResource( 9 )
+[sub_resource type="PlaneMesh" id=8]
+material = SubResource( 7 )
 size = Vector2( 1000, 1000 )
 
-[sub_resource type="CubeMesh" id=5]
+[sub_resource type="CubeMesh" id=9]
 size = Vector3( 1, 1, 1 )
 
-[sub_resource type="CapsuleMesh" id=7]
+[sub_resource type="CapsuleMesh" id=10]
 radius = 0.2
 mid_height = 0.9
 radial_segments = 16
 rings = 2
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=11]
 albedo_color = Color( 0.760784, 0.0470588, 0.0313726, 1 )
 
-[sub_resource type="Animation" id=6]
-resource_name = "circuit"
+[sub_resource type="Animation" id=12]
 length = 16.0
 tracks/0/type = "transform"
 tracks/0/path = NodePath(".")
@@ -99,19 +97,18 @@ material/0 = SubResource( 4 )
 
 [node name="SubFloor" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 153.198, -194.892, -19.587 )
-mesh = SubResource( 11 )
-material/0 = SubResource( 12 )
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
 
 [node name="Wall" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0.00999832, -34.289 )
-mesh = SubResource( 10 )
+mesh = SubResource( 8 )
 material/0 = null
 
 [node name="Cube" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.87472, 1.58369, -9.31987 )
-mesh = SubResource( 5 )
+mesh = SubResource( 9 )
 material/0 = null
-script = ExtResource( 17 )
 
 [node name="OQ_UILabel" parent="." instance=ExtResource( 6 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.173055, 1.45623, -1.86872 )
@@ -150,8 +147,8 @@ transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0.93712
 
 [node name="pilot" type="MeshInstance" parent="gliderpos"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, -1.2, 0 )
-mesh = SubResource( 7 )
-material/0 = SubResource( 8 )
+mesh = SubResource( 10 )
+material/0 = SubResource( 11 )
 
 [node name="oldglider" parent="." instance=ExtResource( 10 )]
 transform = Transform( -0.950423, 0, -0.310959, 0, 1, 0, 0.310959, 0, -0.950423, 0, 0, -2.77533 )
@@ -159,5 +156,5 @@ visible = false
 script = ExtResource( 14 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="oldglider"]
-anims/circuit = SubResource( 6 )
+anims/circuit = SubResource( 12 )
 [connection signal="pressed" from="OQ_UI2DCanvas/ReferenceRect/Button" to="oldglider" method="glidergo"]

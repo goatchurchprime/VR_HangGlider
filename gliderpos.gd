@@ -15,8 +15,15 @@ var headcamoffset = Vector3(0,0,0)
 
 func _process(delta):
 	var camvec = -headcam.global_transform.basis.z
+	if is_nan(camvec.x):
+		print("nan value in ARVRCamera!")
+		return
+	
 	var controllerdisp = pitchcontroller.global_transform.origin - headcam.global_transform.origin
 	var handdist = Vector3(camvec.x, 0, camvec.z).normalized().dot(controllerdisp)	
+	if recarvrorigin != null:  # in flight hand disp needs to be in direction of flight or it responds to head turning
+		handdist = Vector3(camvec.x, 0, 0).normalized().dot(controllerdisp)
+	
 	var hvec = Vector3(1,0,0)
 
 	var Lb = 0.9 - handdist
