@@ -1,19 +1,26 @@
 extends Spatial
 
-onready var gliderkinematics = get_node("../gliderkinematics")
+
 onready var pitchcontroller = get_node("../OQ_ARVROrigin/OQ_RightController")
 onready var arvrorigin = get_node("../OQ_ARVROrigin")
 onready var headcam = get_node("../OQ_ARVROrigin/OQ_ARVRCamera")
 onready var label = get_node("../OQ_UILabel")
 onready var orgpos = transform.origin
 
+var gliderkinematics = null
+var gliderdynamicstate = null
+
+
+
 func _ready():
-	gliderkinematics.pos = orgpos
+	gliderkinematics = load("res://gliderkinematics.gd").new($AeroCentre)
+	gliderdynamicstate = gliderkinematics.initgliderstate()
 
 var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
+export var stationary = false
 
-func _process(delta):
+func _physics_process(delta):
 	var camvec = -headcam.global_transform.basis.z
 	if is_nan(camvec.x):
 		print("nan value in ARVRCamera!")
@@ -22,35 +29,34 @@ func _process(delta):
 	var controllerdisp = pitchcontroller.global_transform.origin - headcam.global_transform.origin
 	var handdist = Vector3(camvec.x, 0, camvec.z).normalized().dot(controllerdisp)	
 	if recarvrorigin != null:  # in flight hand disp needs to be in direction of flight or it responds to head turning
-		handdist = Vector3(camvec.x, 0, 0).normalized().dot(controllerdisp)
+		var controlframeheading = $AeroCentre/TetherPoint/AframeBisector.global_transform.basis.z
+		handdist = controlframeheading.dot(controllerdisp)
 	
+	var h = $AeroCentre/TetherPoint/HangStrap.mesh.size.y/2
+	var Lb = clamp(-handdist, -h*0.9, h*0.9)
+	var epsilon = rad2deg(asin(Lb/h))
+	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
+
 	var hvec = Vector3(1,0,0)
-
-	var Lb = 0.9 - handdist
-	Lb = (Lb-0.4)*2 + 0.4
+	gliderkinematics.flightforcesstate(gliderdynamicstate, Lb)
+	gliderdynamicstate.stepflight(self, delta, hvec)
 	
-	var pos = gliderkinematics.stepdt(delta, Lb, hvec)
 	if recarvrorigin == null:
-		if abs(pos.x - orgpos.x) > abs(orgpos.x)*2:
-			gliderkinematics.pos = orgpos
-	elif abs(pos.x - orgpos.x) > abs(orgpos.x)*20:
-			gliderkinematics.pos = orgpos
+		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*2:
+			transform.origin = orgpos
+	elif abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*20:
+		transform.origin = orgpos
 		
-	label.set_label_text("Lb=%f\npitch=%f" % [Lb, rad2deg(gliderkinematics.Y[3])])
-
-	var bbas = Basis(Vector3(0,0,1), gliderkinematics.Y[3])
-	#pos *= 0.01
-	#var bpos = Vector3(pos.x - floor(pos.x/xrang)*xrang - xrang/2, pos.y - floor(pos.y/yrang)*yrang - yrang/2, zpos)
-	transform = Transform(bbas, pos)
-	$pilot.transform.origin = Vector3(gliderkinematics.CGpilot.x, gliderkinematics.CGpilot.y, 0)
+	label.set_label_text("Lb=%f\npitch=%f" % [Lb, rad2deg(gliderdynamicstate.fr)])
 	
 	if pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
 		if recarvrorigin == null:
-			recarvrorigin = arvrorigin.transform.origin
-			headcamoffset = headcam.transform.origin
+			recarvrorigin = arvrorigin.global_transform.origin
+			headcamoffset = headcam.global_transform.origin - arvrorigin.global_transform.origin
+			#arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
 		else:
-			arvrorigin.transform.origin = recarvrorigin
+			arvrorigin.global_transform.origin = recarvrorigin
 			recarvrorigin = null
 	if recarvrorigin != null:
-		arvrorigin.transform.origin = $pilot.global_transform.origin - headcamoffset
+		arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
 
