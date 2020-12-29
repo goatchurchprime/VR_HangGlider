@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=45 format=2]
 
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin.tscn" type="PackedScene" id=1]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVRCamera.tscn" type="PackedScene" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin/Feature_VRSimulator.tscn" type="PackedScene" id=7]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin/Locomotion_Stick.tscn" type="PackedScene" id=8]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin/Locomotion_WalkInPlace.tscn" type="PackedScene" id=9]
+[ext_resource path="res://SubFloor.gd" type="Script" id=10]
 [ext_resource path="res://OQ_Toolkit/OQ_UI2D/OQ_UI2DCanvas.tscn" type="PackedScene" id=11]
 [ext_resource path="res://OQ_Toolkit/OQ_UI2D/OQ_UI2DLogWindow.tscn" type="PackedScene" id=12]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVRController/Feature_UIRayCast.tscn" type="PackedScene" id=13]
@@ -29,7 +30,7 @@ albedo_color = Color( 0.945098, 0.639216, 0.286275, 1 )
 albedo_texture = SubResource( 3 )
 
 [sub_resource type="PlaneMesh" id=5]
-size = Vector2( 500, 50 )
+size = Vector2( 600, 100 )
 
 [sub_resource type="SpatialMaterial" id=6]
 albedo_color = Color( 0.945098, 0.639216, 0.286275, 1 )
@@ -43,7 +44,7 @@ uv1_scale = Vector3( 10, 10, 1 )
 
 [sub_resource type="PlaneMesh" id=8]
 material = SubResource( 7 )
-size = Vector2( 1000, 1000 )
+size = Vector2( 500, 500 )
 
 [sub_resource type="CubeMesh" id=9]
 size = Vector3( 1, 1, 1 )
@@ -122,7 +123,7 @@ script = ExtResource( 3 )
 [node name="OQ_ARVROrigin" parent="." instance=ExtResource( 1 )]
 
 [node name="OQ_ARVRCamera" parent="OQ_ARVROrigin" instance=ExtResource( 2 )]
-far = 500.0
+far = 1000.0
 
 [node name="OQ_LeftController" parent="OQ_ARVROrigin" instance=ExtResource( 4 )]
 
@@ -142,12 +143,13 @@ mesh = SubResource( 1 )
 material/0 = SubResource( 4 )
 
 [node name="SubFloor" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 153.198, -194.892, -19.587 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 186.782, -150.395, -19.587 )
 mesh = SubResource( 5 )
 material/0 = SubResource( 6 )
+script = ExtResource( 10 )
 
 [node name="Wall" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0.00999832, -34.289 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 146.794, 0.00999832, -73.8117 )
 mesh = SubResource( 8 )
 material/0 = null
 
@@ -239,3 +241,7 @@ material/0 = SubResource( 30 )
 [node name="CollisionShape" type="CollisionShape" parent="gliderpos"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.687679, 0 )
 shape = SubResource( 27 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 161.433, 90.1653 )
+shadow_enabled = true
