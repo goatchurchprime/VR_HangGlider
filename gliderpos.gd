@@ -10,12 +10,11 @@ onready var orgpos = transform.origin
 var gliderkinematics = null
 var gliderdynamicstate = null
 
-
-
 func _ready():
 	gliderkinematics = load("res://gliderkinematics.gd").new($AeroCentre)
 	gliderdynamicstate = gliderkinematics.initgliderstate()
-
+	gliderdynamicstate.stepflight(self, 0.0)
+		
 var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
 export var stationary = false
@@ -37,9 +36,8 @@ func _physics_process(delta):
 	var epsilon = rad2deg(asin(Lb/h))
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
 
-	var hvec = Vector3(1,0,0)
-	gliderkinematics.flightforcesstate(gliderdynamicstate, Lb)
-	gliderdynamicstate.stepflight(self, delta, hvec)
+	gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
+	gliderdynamicstate.stepflight(self, delta)
 	
 	if recarvrorigin == null:
 		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*2:

@@ -24,23 +24,21 @@ var tpdist  = 8.5*c/100 # en m (distance between CGW et Tether point)
 var cgdist  = 0.06 # distance between tether point and the CGW
 var phi     = deg2rad(14)   # angle in degrees between the downtube and the axis perpendicular to the keel
 
-var u0      = 0             # initial position along flight path 
-var v0      = 9             # initial airspeed in m/s
-var alphr0  = deg2rad(20)   # initial angle of attack (alph=a+f)
-var ar0     = deg2rad(-10)  # flight path angle in radians Gamma
-var fr0     = alphr0 + ar0  # pitch attitude in radians/sec Theta
-var br0     = deg2rad(0)    # Initial pitch rate attitude in radians/sec^2
-
 class GliderDynamicState:
-	var v    # airspeed (m/s)
-	var ar   # flight path angle (radians)
-	var fr   # pitch attitude (radians)
-	var br   # pitch rate attitude (radians/sec) (Dfr)
+	var fr    # pitch attitude (radians) (visible in the 3D model)
+	var v     # airspeed (m/s)
+	var ar    # flight path angle (radians)
+	var br    # pitch rate attitude (radians/sec) (Dfr)
 
+	# 3D interpretations of the state
+	var hquat # horizontal heading transform (z+ forward)
+	var fquat # full glider attitude
+	var vvec  # vector of flight
+	
 	# values calculated by flightforcesstate()
-	var Dv   # rate of change of speed in flight direction (m/s^2)
-	var Dar  # rate of change of flight path angle (radians/sec)
-	var Dbr  # rate of change of pitch change velocity (radians/sec^2)
+	var Dv    # rate of change of speed in flight direction (m/s^2)
+	var Dar   # rate of change of flight path angle (radians/sec)
+	var Dbr   # rate of change of pitch change velocity (radians/sec^2)
 
 	func _init():
 		v      = 9                # initial airspeed (m/s)
@@ -48,25 +46,31 @@ class GliderDynamicState:
 		ar     = deg2rad(-10)     # flight path angle (radians)
 		fr     = alphr0 + ar      # pitch attitude (radians)
 		br     = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
+		hquat  = Quat(Vector3(0,1,0), deg2rad(90))
 	
-	func stepflight(gliderpos, dt, hvec):
+	func stepflight(gliderpos, dt):
+		var hvec = hquat.xform(Vector3(0,0,1))
 		var vh = v*cos(ar)
 		var vv = v*sin(ar)
+		vvec = Vector3(vh*hvec.x, vv, vh*hvec.z)
+		fquat = hquat*Quat(Vector3(1,0,0), -fr)
+
 		var heading = 90
 		var bbas = Basis(Vector3(1,0,0), -fr).rotated(Vector3(0,1,0), deg2rad(heading))
-		var bpos = gliderpos.transform.origin + Vector3(vh*hvec.x, vv, vh*hvec.z)*dt
-		gliderpos.transform = Transform(bbas, bpos)
-		v += Dv*dt
-		ar += Dar*dt
-		fr += br*dt
-		br += Dbr*dt
+		#print(bbas)
+		#print(Basis(fquat))
+		var bpos = gliderpos.transform.origin + vvec*dt
+		gliderpos.transform = Transform(Basis(fquat), bpos)
+		if dt != 0.0:
+			v += Dv*dt
+			ar += Dar*dt
+			fr += br*dt
+			br += Dbr*dt
 		
 		var velocityvector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
 		velocityvector.rotation_degrees.x = rad2deg(fr - ar)
 		velocityvector.scale.z = v
 		gliderpos.get_node("AeroCentre/PitchRate").rotation_degrees.x = rad2deg(-br)
-
-
 
 func _init(AeroCentre):
 	h = AeroCentre.get_node("TetherPoint/HangStrap").mesh.size.y/2
@@ -78,33 +82,33 @@ func _init(AeroCentre):
 func initgliderstate():
 	return GliderDynamicState.new()
 
-func flightforcesstate(s, Lb):
-	var alpha = s.fr - s.ar
+func flightforcesstate(s, Lb, gliderpos):
+	# need to calculate these from the geometric gliderpos model directly
+	var TP     = tpdist*Vector2(cos(s.fr), sin(s.fr))         # Tether point
+	var CGW    = TP + cgdist*Vector2(cos(s.fr), sin(s.fr))    # CG of wing
+	var TP3    = gliderpos.transform.basis.xform(gliderpos.get_node("AeroCentre/TetherPoint").transform.origin)
+	var ksi    = atan(Lb/h)                                   # angle between cg pilot and the downtubes
+	var CGP    = TP + h*Vector2(sin(s.fr+phi+ksi), -cos(s.fr+phi+ksi))  # CG of pilot
+	var CGT    = (CGP*mpilot + CGW*mwing)/(mpilot + mwing)    # Position CG of the system (pilot+wing)
+
+	# the wing aerodynamics
+	var alpha  = s.fr - s.ar
 	var alphasq = alpha*alpha
 	var alphacu = alpha*alphasq 
-
 	var Clift  = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
 	var Cdg    = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
 
+	# resolution of the forces
 	var vsq    = s.v*s.v               # airspeed square
 	var lift   = 0.5*rho*vsq*S*Clift
 	var Dcdg   = 0.5*rho*vsq*Cdg*S     # Drag of the wing alone
 	var Dpilot = 0.5*rho*vsq*Scx       # Drag of the pilot alone
 	var drag   = Dcdg + Dpilot         # Drag of the system (wing + pilot)
-
 	var dyn    = 0.5*rho*vsq*S         # dynamic pressure
 
-	var TP     = tpdist*Vector2(cos(s.fr), sin(s.fr))         # Tether point
-	var CGW    = TP + cgdist*Vector2(cos(s.fr), sin(s.fr))    # CG of wing
-	var ksi  = atan(Lb/h)                                 # angle between cg pilot and the downtubes
-	var CGP  = TP + h*Vector2(sin(s.fr+phi+ksi), -cos(s.fr+phi+ksi))  # CG of pilot
-	var CGT  = (CGP*mpilot + CGW*mwing)/(mpilot + mwing)  # Position CG of the system (pilot+wing)
-
-	# Tau=z[4];
 	var Cx  = -Dcdg
 	var Cy  = lift
 	var d   = CGT.length()
-	
 	var Xw  = CGT.x
 	var ARcu = AR*AR*AR
 	var tansweep = tan(sweep)
@@ -118,7 +122,12 @@ func flightforcesstate(s, Lb):
 	var XP  = CGP.x - CGT.x
 	var YP  = CGP.y - CGT.y
 
-	s.Dv = -g*sin(s.ar) - (drag/M)  # acceleration in direction of flight
-	s.Dar = (1/s.v*(-g*cos(s.ar) + (lift/M)))  # angular change of direction of flight path angle
-	s.Dbr = (Cmo*dyn*c + mwing*g*XWT + mpilot*g*XP - Cy*CGT[0] - Cx*(-CGT[1]) - YP*Dpilot + Mq + Mq2)/I
-
+	# acceleration in direction of flight
+	s.Dv = -g*sin(s.ar) - drag/M  
+	
+	# angular change of direction of flight path angle
+	s.Dar = 1/s.v*(-g*cos(s.ar) + (lift/M))  
+	
+	# rate of change in the pitch rate
+	s.Dbr = (Cmo*dyn*c + mwing*g*XWT + mpilot*g*XP - Cy*CGT[0] - Cx*(-CGT[1]) - YP*Dpilot + Mq + Mq2)/I  
+	
