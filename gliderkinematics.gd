@@ -57,15 +57,13 @@ class GliderDynamicState:
 
 		var heading = 90
 		var bbas = Basis(Vector3(1,0,0), -fr).rotated(Vector3(0,1,0), deg2rad(heading))
-		#print(bbas)
-		#print(Basis(fquat))
 		var bpos = gliderpos.transform.origin + vvec*dt
 		gliderpos.transform = Transform(Basis(fquat), bpos)
 		if dt != 0.0:
-			v += Dv*dt
-			ar += Dar*dt
-			fr += br*dt
-			br += Dbr*dt
+			v = clamp(v + Dv*dt, 1, 50)
+			ar = clamp(ar + Dar*dt, deg2rad(-35), deg2rad(35))
+			fr = clamp(fr + br*dt,  deg2rad(-35), deg2rad(35))
+			br = clamp(br + Dbr*dt, -10, 10)
 		
 		var velocityvector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
 		velocityvector.rotation_degrees.x = rad2deg(fr - ar)
@@ -92,11 +90,12 @@ func flightforcesstate(s, Lb, gliderpos):
 	var CGT    = (CGP*mpilot + CGW*mwing)/(mpilot + mwing)    # Position CG of the system (pilot+wing)
 
 	# the wing aerodynamics
-	var alpha  = s.fr - s.ar
+	var alpha  = clamp(s.fr - s.ar, deg2rad(-35), deg2rad(35))
 	var alphasq = alpha*alpha
 	var alphacu = alpha*alphasq 
 	var Clift  = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
 	var Cdg    = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	assert (s.v>0)
 
 	# resolution of the forces
 	var vsq    = s.v*s.v               # airspeed square
@@ -127,7 +126,7 @@ func flightforcesstate(s, Lb, gliderpos):
 	
 	# angular change of direction of flight path angle
 	s.Dar = 1/s.v*(-g*cos(s.ar) + (lift/M))  
-	
+
 	# rate of change in the pitch rate
 	s.Dbr = (Cmo*dyn*c + mwing*g*XWT + mpilot*g*XP - Cy*CGT[0] - Cx*(-CGT[1]) - YP*Dpilot + Mq + Mq2)/I  
 	

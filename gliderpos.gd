@@ -21,6 +21,18 @@ var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
 export var stationary = false
 
+
+func _process(delta):
+	if Input.is_action_just_pressed("ui_home") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
+		if recarvrorigin == null:
+			recarvrorigin = arvrorigin.global_transform.origin
+			headcamoffset = headcam.global_transform.origin - arvrorigin.global_transform.origin
+			#arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
+		else:
+			arvrorigin.global_transform.origin = recarvrorigin
+			recarvrorigin = null
+
+
 func _physics_process(delta):
 	var camvec = -headcam.global_transform.basis.z
 	if is_nan(camvec.x):
@@ -59,14 +71,6 @@ func _physics_process(delta):
 		
 	#label.set_label_text("Lb=%f\npitch=%f" % [Lb, rad2deg(gliderdynamicstate.fr)])
 	
-	if pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
-		if recarvrorigin == null:
-			recarvrorigin = arvrorigin.global_transform.origin
-			headcamoffset = headcam.global_transform.origin - arvrorigin.global_transform.origin
-			#arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
-		else:
-			arvrorigin.global_transform.origin = recarvrorigin
-			recarvrorigin = null
 	if recarvrorigin != null:
 		arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
 
