@@ -41,14 +41,14 @@ class GliderDynamicState:
 	var Dbr   # rate of change of pitch change velocity (radians/sec^2)
 
 	func _init():
-		v      = 9                # initial airspeed (m/s)
+		v      = 12                # initial airspeed (m/s)
 		var alphr0 = deg2rad(20)  # initial angle of attack (alph=a+f)
 		ar     = deg2rad(-10)     # flight path angle (radians)
 		fr     = alphr0 + ar      # pitch attitude (radians)
 		br     = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
 		hquat  = Quat(Vector3(0,1,0), deg2rad(90))
 	
-	func stepflight(gliderpos, dt):
+	func stepflight(dt):
 		var hvec = hquat.xform(Vector3(0,0,1))
 		var vh = v*cos(ar)
 		var vv = v*sin(ar)
@@ -57,19 +57,12 @@ class GliderDynamicState:
 
 		var heading = 90
 		var bbas = Basis(Vector3(1,0,0), -fr).rotated(Vector3(0,1,0), deg2rad(heading))
-		var bpos = gliderpos.transform.origin + vvec*dt
-		gliderpos.transform = Transform(Basis(fquat), bpos)
 		if dt != 0.0:
 			v = clamp(v + Dv*dt, 1, 50)
 			ar = clamp(ar + Dar*dt, deg2rad(-35), deg2rad(35))
 			fr = clamp(fr + br*dt,  deg2rad(-35), deg2rad(35))
 			br = clamp(br + Dbr*dt, -10, 10)
 		
-		var velocityvector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
-		velocityvector.rotation_degrees.x = rad2deg(fr - ar)
-		velocityvector.scale.z = v
-		gliderpos.get_node("AeroCentre/PitchRate").rotation_degrees.x = rad2deg(-br)
-
 func _init(AeroCentre):
 	h = AeroCentre.get_node("TetherPoint/HangStrap").mesh.size.y/2
 	tpdist = AeroCentre.get_node("TetherPoint").transform.origin.z

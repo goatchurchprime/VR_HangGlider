@@ -1,5 +1,4 @@
-extends Spatial
-
+extends RigidBody
 
 onready var pitchcontroller = get_node("../OQ_ARVROrigin/OQ_RightController")
 onready var arvrorigin = get_node("../OQ_ARVROrigin")
@@ -11,16 +10,20 @@ onready var windNoise = get_node("glider2/WindNoise3D")
 var gliderkinematics = null
 var gliderdynamicstate = null
 
+func takeoffstart():
+	mode = RigidBody.MODE_KINEMATIC
+	transform.origin = orgpos
+	gliderdynamicstate = gliderkinematics.initgliderstate()
+	gliderdynamicstate.stepflight(0.0)
+	windNoise.play()
+
 func _ready():
 	gliderkinematics = load("res://gliderkinematics.gd").new($AeroCentre)
-	gliderdynamicstate = gliderkinematics.initgliderstate()
-	gliderdynamicstate.stepflight(self, 0.0)
-	windNoise.play()
-		
+	takeoffstart()
+	
 var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
 export var stationary = false
-
 
 func _process(delta):
 	if Input.is_action_just_pressed("ui_home") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
@@ -32,6 +35,13 @@ func _process(delta):
 			arvrorigin.global_transform.origin = recarvrorigin
 			recarvrorigin = null
 
+	if Input.is_action_just_pressed("ui_end"):
+		windNoise.stop()
+		mode = RigidBody.MODE_RIGID
+		linear_velocity = gliderdynamicstate.vvec
+			
+	if Input.is_action_just_pressed("ui_page_down") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.XA):
+		takeoffstart()
 
 func _physics_process(delta):
 	var camvec = -headcam.global_transform.basis.z
@@ -50,21 +60,34 @@ func _physics_process(delta):
 	var epsilon = rad2deg(asin(Lb/h))
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
 
-	gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
-	gliderdynamicstate.stepflight(self, delta)
-
-		
+	if mode == RigidBody.MODE_KINEMATIC:
+		gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
+		gliderdynamicstate.stepflight(delta)
+		var kinematiccollision = $KinematicBody.move_and_collide(gliderdynamicstate.vvec*delta, true, true, true)
+		if kinematiccollision == null:
+			var bpos = transform.origin + gliderdynamicstate.vvec*delta
+			transform = Transform(Basis(gliderdynamicstate.fquat), bpos)
+			$AeroCentre/TetherPoint/NosePoint/VelocityVector.rotation_degrees.x = rad2deg(gliderdynamicstate.fr - gliderdynamicstate.ar)
+			$AeroCentre/TetherPoint/NosePoint/VelocityVector.scale.z = gliderdynamicstate.v
+			$AeroCentre/PitchRate.rotation_degrees.x = rad2deg(-gliderdynamicstate.br)
+		else:
+			windNoise.stop()
+			mode = RigidBody.MODE_RIGID
+			linear_velocity = gliderdynamicstate.vvec
+			
 	#Link wind noise volume and pitch to glider velocity
 	#lb range = -0.6 (push out) to 0.2 (pull in)
 
-	var windVolume =   gliderdynamicstate.v * 5 - 30 # 2.5 - 40
+	var windVolume = gliderdynamicstate.v * 5 - 30 # 2.5 - 40
 	windNoise.unit_db = windVolume 
 	var windPitch = gliderdynamicstate.v * 0.08 -.1#-.4
 	windNoise.pitch_scale = windPitch
 	label.set_label_text("Lb=%f\nvolume=%f" % [Lb, rad2deg(windVolume)])
 	
-	if recarvrorigin == null:
-		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*2:
+	if mode == RigidBody.MODE_RIGID:
+		pass
+	elif recarvrorigin == null:
+		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*3:
 			transform.origin = orgpos
 	elif abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*20:
 		transform.origin = orgpos
@@ -73,4 +96,3 @@ func _physics_process(delta):
 	
 	if recarvrorigin != null:
 		arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
-
