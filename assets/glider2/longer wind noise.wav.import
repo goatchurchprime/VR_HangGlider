@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/longer wind noise.wav-6ca968f2e718872097eba40e73f67855.sample"
+
+[deps]
+
+source_file="res://assets/glider2/longer wind noise.wav"
+dest_files=[ "res://.import/longer wind noise.wav-6ca968f2e718872097eba40e73f67855.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=true
+compress/mode=0

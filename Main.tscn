@@ -143,6 +143,10 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0 )
 mesh = SubResource( 1 )
 material/0 = SubResource( 4 )
 
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Floor"]
+stream = ExtResource( 14 )
+autoplay = true
+
 [node name="SubFloor" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 186.782, -150.395, -19.587 )
 mesh = SubResource( 5 )
@@ -196,10 +200,6 @@ transform = Transform( 1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195,
 transform = Transform( 1, 0, 0, 0, 1, -7.45058e-09, 0, 7.45058e-09, 1, 0, 0.105775, 1.20902 )
 stream = ExtResource( 14 )
 max_db = 2.0
-
-[node name="Listener" type="Listener" parent="gliderpos/glider2/WindNoise3D"]
-transform = Transform( 1, 0, 0, 0, 1, 2.23517e-08, 0, -1.49012e-08, 1, 0, -0.105775, -1.20902 )
-current = true
 
 [node name="AeroCentre" type="MeshInstance" parent="gliderpos"]
 mesh = SubResource( 10 )
