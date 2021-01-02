@@ -1,17 +1,16 @@
-extends MeshInstance
-
+extends StaticBody
 
 var k = 0
 func theight(x, y):
 	return Vector3(x, -cos(x/50)*40 + sin((y+x)/10)*5 - x*0.2 + 60, y)
 
 func _ready():
-	var wx = mesh.size.x/2
-	var wy = mesh.size.y/2
+	var wx = $MeshInstance.mesh.size.x/2
+	var wy = $MeshInstance.mesh.size.y/2
 	var nx = 80
 	var ny = 20
 	 
-	var mat = get_surface_material(0)
+	var mat = $MeshInstance.get_surface_material(0)
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in range(nx):
@@ -40,5 +39,11 @@ func _ready():
 			st.add_vertex(theight(x0, y1))
 		
 	st.generate_normals()
-	mesh = st.commit()
-	set_surface_material(0, mat)
+	$MeshInstance.mesh = st.commit()
+	$MeshInstance.set_surface_material(0, mat)
+	
+	var cps = ConcavePolygonShape.new()
+	cps.margin = 0.01
+	cps.set_faces($MeshInstance.mesh.get_faces())
+	$CollisionShape.shape = cps
+

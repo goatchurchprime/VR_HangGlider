@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://OQ_Toolkit/OQ_ARVROrigin.tscn" type="PackedScene" id=1]
 [ext_resource path="res://OQ_Toolkit/OQ_ARVRCamera.tscn" type="PackedScene" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://OQ_Toolkit/OQ_ARVRController/Feature_UIRayCast.tscn" type="PackedScene" id=13]
 [ext_resource path="res://assets/glider2/longer wind noise.wav" type="AudioStream" id=14]
 [ext_resource path="res://assets/glider2/HG_graphic_model.glb" type="PackedScene" id=15]
+[ext_resource path="res://default_env.tres" type="Environment" id=16]
 [ext_resource path="res://gliderpos.gd" type="Script" id=18]
 
 [sub_resource type="PlaneMesh" id=1]
@@ -47,75 +48,80 @@ uv1_scale = Vector3( 10, 10, 1 )
 material = SubResource( 7 )
 size = Vector2( 500, 500 )
 
-[sub_resource type="CubeMesh" id=9]
-size = Vector3( 1, 1, 1 )
-
-[sub_resource type="SphereMesh" id=10]
-radius = 0.02
-height = 0.1
+[sub_resource type="CylinderMesh" id=10]
+top_radius = 0.001
+bottom_radius = 0.02
+height = 0.04
 
 [sub_resource type="SpatialMaterial" id=11]
-albedo_color = Color( 0.937255, 0.901961, 0.0666667, 1 )
+albedo_color = Color( 0.0431373, 0.152941, 0.882353, 1 )
 
 [sub_resource type="SphereMesh" id=12]
 radius = 0.02
 height = 0.1
 
 [sub_resource type="SpatialMaterial" id=13]
-albedo_color = Color( 0.956863, 0.941176, 0.0352941, 1 )
+albedo_color = Color( 0.937255, 0.901961, 0.0666667, 1 )
 
-[sub_resource type="CubeMesh" id=14]
-size = Vector3( 0.02, 2, 0.02 )
+[sub_resource type="SphereMesh" id=14]
+radius = 0.02
+height = 0.1
 
 [sub_resource type="SpatialMaterial" id=15]
-albedo_color = Color( 0.960784, 0.945098, 0.0705882, 1 )
+albedo_color = Color( 0.956863, 0.941176, 0.0352941, 1 )
 
 [sub_resource type="CubeMesh" id=16]
+size = Vector3( 0.02, 2, 0.02 )
+
+[sub_resource type="SpatialMaterial" id=17]
+albedo_color = Color( 0.960784, 0.945098, 0.0705882, 1 )
+
+[sub_resource type="CubeMesh" id=18]
 size = Vector3( 0.02, 2.4, 0.02 )
 
-[sub_resource type="CapsuleMesh" id=17]
+[sub_resource type="CapsuleMesh" id=19]
 radius = 0.1
 mid_height = 0.9
 radial_segments = 16
 rings = 2
 
-[sub_resource type="SpatialMaterial" id=18]
+[sub_resource type="SpatialMaterial" id=20]
 albedo_color = Color( 0.760784, 0.0470588, 0.0313726, 1 )
 
-[sub_resource type="SphereMesh" id=19]
+[sub_resource type="SphereMesh" id=21]
 radius = 0.1
 height = 0.21
 
-[sub_resource type="SpatialMaterial" id=20]
+[sub_resource type="SpatialMaterial" id=22]
 albedo_color = Color( 0.054902, 0.705882, 0.905882, 1 )
 
-[sub_resource type="SphereMesh" id=21]
+[sub_resource type="SphereMesh" id=23]
 radius = 0.02
 height = 0.2
 
-[sub_resource type="SpatialMaterial" id=22]
+[sub_resource type="SpatialMaterial" id=24]
 albedo_color = Color( 0.972549, 0.980392, 0.0705882, 1 )
 
-[sub_resource type="SphereMesh" id=23]
+[sub_resource type="SphereMesh" id=25]
 radius = 0.05
 height = 0.2
 
-[sub_resource type="SpatialMaterial" id=24]
+[sub_resource type="SpatialMaterial" id=26]
 albedo_color = Color( 0.945098, 0.909804, 0.0313726, 1 )
 
-[sub_resource type="CubeMesh" id=25]
+[sub_resource type="CubeMesh" id=27]
 size = Vector3( 0.02, 0.02, 1 )
 
-[sub_resource type="SpatialMaterial" id=26]
+[sub_resource type="SpatialMaterial" id=28]
 albedo_color = Color( 0.0235294, 0.6, 0.945098, 1 )
 
-[sub_resource type="PrismMesh" id=27]
+[sub_resource type="PrismMesh" id=29]
 size = Vector3( 0.1, 0.1, 1.5 )
 
-[sub_resource type="SpatialMaterial" id=28]
+[sub_resource type="SpatialMaterial" id=30]
 albedo_color = Color( 0.890196, 0.0431373, 0.960784, 1 )
 
-[sub_resource type="BoxShape" id=29]
+[sub_resource type="BoxShape" id=31]
 extents = Vector3( 4, 0.8, 1 )
 
 [node name="Main" type="Spatial"]
@@ -143,24 +149,28 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0 )
 mesh = SubResource( 1 )
 material/0 = SubResource( 4 )
 
+<<<<<<< HEAD
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Floor"]
 stream = ExtResource( 14 )
 autoplay = true
 
 [node name="SubFloor" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 186.782, -150.395, -19.587 )
+=======
+[node name="SubFloor" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 221.307, -159.391, -19.587 )
+script = ExtResource( 10 )
+
+[node name="MeshInstance" type="MeshInstance" parent="SubFloor"]
+>>>>>>> 66b7894d7835ee3942333729880a0c0f1519cad3
 mesh = SubResource( 5 )
 material/0 = SubResource( 6 )
-script = ExtResource( 10 )
+
+[node name="CollisionShape" type="CollisionShape" parent="SubFloor"]
 
 [node name="Wall" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 146.794, 0.00999832, -73.8117 )
 mesh = SubResource( 8 )
-material/0 = null
-
-[node name="Cube" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.87472, 1.58369, -9.31987 )
-mesh = SubResource( 9 )
 material/0 = null
 
 [node name="OQ_UILabel" parent="." instance=ExtResource( 6 )]
@@ -190,68 +200,98 @@ __meta__ = {
 
 [node name="gliderpos" type="RigidBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -23.9776, 6.47581, -25.8141 )
+collision_layer = 2
 mode = 3
+contacts_reported = 1
+contact_monitor = true
 script = ExtResource( 18 )
 
 [node name="glider2" parent="gliderpos" instance=ExtResource( 15 )]
 transform = Transform( 1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, -0.026907, -1.53486, 0.682842 )
 
 [node name="WindNoise3D" type="AudioStreamPlayer3D" parent="gliderpos/glider2"]
-transform = Transform( 1, 0, 0, 0, 1, -7.45058e-09, 0, 7.45058e-09, 1, 0, 0.105775, 1.20902 )
+transform = Transform( 1, 0, 0, 0, 1, -2.23517e-08, 0, 1.49012e-08, 1, 0, 0.304175, 3.47675 )
 stream = ExtResource( 14 )
+attenuation_model = 3
 max_db = 2.0
 
+<<<<<<< HEAD
 [node name="AeroCentre" type="MeshInstance" parent="gliderpos"]
+=======
+[node name="MeshInstance" type="MeshInstance" parent="gliderpos/glider2/WindNoise3D"]
+transform = Transform( 2.65431e-14, 1.62921e-07, 1, 1, -1.62921e-07, 0, 1.62921e-07, 1, -1.62921e-07, 0, 0, 0 )
+>>>>>>> 66b7894d7835ee3942333729880a0c0f1519cad3
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
 
-[node name="TetherPoint" type="MeshInstance" parent="gliderpos/AeroCentre"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.161 )
+[node name="AeroCentre" type="MeshInstance" parent="gliderpos"]
+cast_shadow = 0
 mesh = SubResource( 12 )
 material/0 = SubResource( 13 )
 
-[node name="AframeBisector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 0.970296, 0.241922, 0, -0.241922, 0.970296, 0, 0, 0 )
+[node name="TetherPoint" type="MeshInstance" parent="gliderpos/AeroCentre"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.161 )
+cast_shadow = 0
 mesh = SubResource( 14 )
 material/0 = SubResource( 15 )
 
+[node name="AframeBisector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
+transform = Transform( 1, 0, 0, 0, 0.970296, 0.241922, 0, -0.241922, 0.970296, 0, 0, 0 )
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 17 )
+
 [node name="HangStrap" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
 transform = Transform( 1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 0, 0 )
-mesh = SubResource( 16 )
+mesh = SubResource( 18 )
 material/0 = null
 
 [node name="PilotBody" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/HangStrap"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2, 0 )
-mesh = SubResource( 17 )
-material/0 = SubResource( 18 )
-
-[node name="PilotHead" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/HangStrap/PilotBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45 )
 mesh = SubResource( 19 )
 material/0 = SubResource( 20 )
 
-[node name="CGWing" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06 )
+[node name="PilotHead" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/HangStrap/PilotBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45 )
 mesh = SubResource( 21 )
 material/0 = SubResource( 22 )
 
-[node name="NosePoint" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.43782 )
+[node name="CGWing" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06 )
+cast_shadow = 0
 mesh = SubResource( 23 )
 material/0 = SubResource( 24 )
 
-[node name="VelocityVector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/NosePoint"]
+[node name="NosePoint" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.43782 )
+cast_shadow = 0
 mesh = SubResource( 25 )
 material/0 = SubResource( 26 )
 
-[node name="PitchRate" type="MeshInstance" parent="gliderpos/AeroCentre"]
+[node name="VelocityVector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/NosePoint"]
+cast_shadow = 0
 mesh = SubResource( 27 )
 material/0 = SubResource( 28 )
 
+[node name="PitchRate" type="MeshInstance" parent="gliderpos/AeroCentre"]
+cast_shadow = 0
+mesh = SubResource( 29 )
+material/0 = SubResource( 30 )
+
 [node name="CollisionShape" type="CollisionShape" parent="gliderpos"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.687679, 0 )
-shape = SubResource( 29 )
+shape = SubResource( 31 )
+
+[node name="KinematicBody" type="KinematicBody" parent="gliderpos"]
+collision_layer = 2
+
+[node name="CollisionShape" type="CollisionShape" parent="gliderpos/KinematicBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.687679, 0 )
+shape = SubResource( 31 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.258819, 0.965926, 0, -0.965926, 0.258819, 0, 161.433, 90.1653 )
 shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource( 16 )

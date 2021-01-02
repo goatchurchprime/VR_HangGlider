@@ -41,14 +41,14 @@ class GliderDynamicState:
 	var Dbr   # rate of change of pitch change velocity (radians/sec^2)
 
 	func _init():
-		v      = 9                # initial airspeed (m/s)
+		v      = 12                # initial airspeed (m/s)
 		var alphr0 = deg2rad(20)  # initial angle of attack (alph=a+f)
 		ar     = deg2rad(-10)     # flight path angle (radians)
 		fr     = alphr0 + ar      # pitch attitude (radians)
 		br     = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
 		hquat  = Quat(Vector3(0,1,0), deg2rad(90))
 	
-	func stepflight(gliderpos, dt):
+	func stepflight(dt):
 		var hvec = hquat.xform(Vector3(0,0,1))
 		var vh = v*cos(ar)
 		var vv = v*sin(ar)
@@ -57,21 +57,12 @@ class GliderDynamicState:
 
 		var heading = 90
 		var bbas = Basis(Vector3(1,0,0), -fr).rotated(Vector3(0,1,0), deg2rad(heading))
-		#print(bbas)
-		#print(Basis(fquat))
-		var bpos = gliderpos.transform.origin + vvec*dt
-		gliderpos.transform = Transform(Basis(fquat), bpos)
 		if dt != 0.0:
-			v += Dv*dt
-			ar += Dar*dt
-			fr += br*dt
-			br += Dbr*dt
+			v = clamp(v + Dv*dt, 1, 50)
+			ar = clamp(ar + Dar*dt, deg2rad(-35), deg2rad(35))
+			fr = clamp(fr + br*dt,  deg2rad(-35), deg2rad(35))
+			br = clamp(br + Dbr*dt, -10, 10)
 		
-		var velocityvector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
-		velocityvector.rotation_degrees.x = rad2deg(fr - ar)
-		velocityvector.scale.z = v
-		gliderpos.get_node("AeroCentre/PitchRate").rotation_degrees.x = rad2deg(-br)
-
 func _init(AeroCentre):
 	h = AeroCentre.get_node("TetherPoint/HangStrap").mesh.size.y/2
 	tpdist = AeroCentre.get_node("TetherPoint").transform.origin.z
@@ -92,11 +83,12 @@ func flightforcesstate(s, Lb, gliderpos):
 	var CGT    = (CGP*mpilot + CGW*mwing)/(mpilot + mwing)    # Position CG of the system (pilot+wing)
 
 	# the wing aerodynamics
-	var alpha  = s.fr - s.ar
+	var alpha  = clamp(s.fr - s.ar, deg2rad(-35), deg2rad(35))
 	var alphasq = alpha*alpha
 	var alphacu = alpha*alphasq 
 	var Clift  = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
 	var Cdg    = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	assert (s.v>0)
 
 	# resolution of the forces
 	var vsq    = s.v*s.v               # airspeed square
@@ -127,7 +119,7 @@ func flightforcesstate(s, Lb, gliderpos):
 	
 	# angular change of direction of flight path angle
 	s.Dar = 1/s.v*(-g*cos(s.ar) + (lift/M))  
-	
+
 	# rate of change in the pitch rate
 	s.Dbr = (Cmo*dyn*c + mwing*g*XWT + mpilot*g*XP - Cy*CGT[0] - Cx*(-CGT[1]) - YP*Dpilot + Mq + Mq2)/I  
 	
