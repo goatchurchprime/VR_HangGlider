@@ -14,7 +14,7 @@ func takeoffstart():
 	mode = RigidBody.MODE_KINEMATIC
 	transform.origin = orgpos
 	gliderdynamicstate = gliderkinematics.initgliderstate()
-	gliderdynamicstate.stepflight(0.0)
+	gliderdynamicstate.setgliderpos(self, transform.origin)
 	windNoise.play()
 
 func _ready():
@@ -55,22 +55,16 @@ func _physics_process(delta):
 		var controlframeheading = $AeroCentre/TetherPoint/AframeBisector.global_transform.basis.z
 		handdist = controlframeheading.dot(controllerdisp)
 	
-	var h = $AeroCentre/TetherPoint/HangStrap.mesh.size.y/2
+	var h = gliderkinematics.h
 	var Lb = clamp(-handdist, -h*0.9, h*0.9)
-	var epsilon = rad2deg(asin(Lb/h))
+	var epsilon = rad2deg(atan(Lb/h))   # probably should be asin
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
 
 	if mode == RigidBody.MODE_KINEMATIC:
 		gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
-		gliderdynamicstate.stepflight(delta)
+		gliderdynamicstate.stepflight(delta, self)
 		var kinematiccollision = $KinematicBody.move_and_collide(gliderdynamicstate.vvec*delta, true, true, true)
-		if kinematiccollision == null:
-			var bpos = transform.origin + gliderdynamicstate.vvec*delta
-			transform = Transform(Basis(gliderdynamicstate.fquat), bpos)
-			$AeroCentre/TetherPoint/NosePoint/VelocityVector.rotation_degrees.x = rad2deg(gliderdynamicstate.fr - gliderdynamicstate.ar)
-			$AeroCentre/TetherPoint/NosePoint/VelocityVector.scale.z = gliderdynamicstate.v
-			$AeroCentre/PitchRate.rotation_degrees.x = rad2deg(-gliderdynamicstate.br)
-		else:
+		if kinematiccollision != null:
 			windNoise.stop()
 			mode = RigidBody.MODE_RIGID
 			linear_velocity = gliderdynamicstate.vvec
