@@ -72,9 +72,9 @@ func _physics_process(delta):
 	#Link wind noise volume and pitch to glider velocity
 	#lb range = -0.6 (push out) to 0.2 (pull in)
 
-	var windVolume = gliderdynamicstate.v * 5 - 30 # 2.5 - 40
+	var windVolume = gliderdynamicstate.vvec.length() * 5 - 30 # 2.5 - 40
 	windNoise.unit_db = windVolume 
-	var windPitch = gliderdynamicstate.v * 0.08 -.1#-.4
+	var windPitch = gliderdynamicstate.vvec.length() * 0.08 -.1#-.4
 	windNoise.pitch_scale = windPitch
 	label.set_label_text("Lb=%f\nvolume=%f" % [Lb, rad2deg(windVolume)])
 	
