@@ -44,30 +44,29 @@ class GliderDynamicState:
 	var Dvvec  # flight velocity acceleration (derived from Dv, Dar)
 	var Dfrot  # rate of rotation to add to the frot 
 	
-	var Dcount = 10
-	
 	func _init():
 		var v  = 12               # initial airspeed (m/s)
 		var alphr0 = deg2rad(20)  # initial angle of attack (alph=a+f)
 		var ar = deg2rad(-10)     # flight path angle (radians)
 		var fr = alphr0 + ar      # pitch attitude (radians)
 		var br = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
-		fquat  = hquat*Quat(Vector3(1,0,0), -fr)
+		var attituderot = Vector3(1,0,0)
+		fquat  = hquat*Quat(attituderot.normalized(), -fr)
 		var hvec = hquat.xform(Vector3(0,0,1))
 		vvec   = v*Vector3(cos(ar)*hvec.x, sin(ar), cos(ar)*hvec.z)
 		frot   = Vector3(0,0,br)
 		
 	func stepflight(dt, gliderpos):
-		#fr = clamp(fr + br*dt,  deg2rad(-35), deg2rad(35))
 		frot += Dfrot*dt
-		var hvec = hquat.xform(Vector3(0,0,1))
 		vvec += Dvvec*dt
-		#fquat = hquat*Quat(Vector3(1,0,0), -fr)
-		fquat = Quat(Vector3(0,0,1), frot.z*dt)*fquat
+		var Dfquat = Quat(frot.normalized(), frot.length()*dt)
+		#Dfquat = Quat(Vector3(0,0,1), frot.z*dt)
+		fquat = Dfquat*fquat
 		setgliderpos(gliderpos, gliderpos.transform.origin + vvec*dt)
 
 	func setgliderpos(gliderpos, bpos):
 		gliderpos.transform = Transform(Basis(fquat), bpos)
+		assert (not (is_nan(gliderpos.transform.basis.x.x) or is_nan(gliderpos.transform.basis.x.y) or is_nan(gliderpos.transform.basis.x.z)))
 		var NosePoint = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint")
 		var VelocityVector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
 		VelocityVector.global_transform = NosePoint.global_transform.looking_at(NosePoint.global_transform.origin+vvec, Vector3(0,1,0))
@@ -76,10 +75,7 @@ class GliderDynamicState:
 
 
 func _init(AeroCentre):
-	h      = AeroCentre.get_node("TetherPoint/HangStrap").mesh.size.y/2
-	var h1 = -AeroCentre.get_node("TetherPoint/HangStrap/PilotBody").transform.origin.y
-	assert (h == h1)
-	
+	h      = -AeroCentre.get_node("TetherPoint/HangStrap/PilotBody").transform.origin.y
 	tpdist = AeroCentre.get_node("TetherPoint").transform.origin.z
 	phi    = deg2rad(-AeroCentre.get_node("TetherPoint/AframeBisector").rotation_degrees.x)
 	cgdist = AeroCentre.get_node("TetherPoint/CGWing").transform.origin.z
@@ -94,7 +90,8 @@ var Dcount = 10
 func flightforcesstate(s, Lb, gliderpos):
 	var airspeedvector = localwindvector - s.vvec
 	var avecDrag = airspeedvector.normalized()
-	var avecLift = gliderpos.get_node("AeroCentre").global_transform.basis.x.cross(avecDrag)
+	var avecWingAxis = gliderpos.get_node("AeroCentre").global_transform.basis.x
+	var avecLift = avecWingAxis.cross(avecDrag)
 
 	var wingrelativeairspeedvector = s.fquat.inverse().xform(airspeedvector)
 	var alpha = -atan2(-wingrelativeairspeedvector.y, -wingrelativeairspeedvector.z)
@@ -106,7 +103,7 @@ func flightforcesstate(s, Lb, gliderpos):
 	var Cdg    = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
 
 	# resolution of the forces
-	var airspeed = wingrelativeairspeedvector.length()
+	var airspeed = clamp(wingrelativeairspeedvector.length(), 0, 30)
 	var vsq    = airspeed*airspeed     # airspeed square
 	var lift   = 0.5*rho*vsq*S*Clift
 	var Dcdg   = 0.5*rho*vsq*Cdg*S     # Drag of the wing alone
@@ -115,10 +112,13 @@ func flightforcesstate(s, Lb, gliderpos):
 
 	# step vector for position	
 	s.Dvvec = avecLift*(lift/M) + avecDrag*(drag/M) - Vector3(0, g, 0)
-
+	assert (not (is_nan(s.Dvvec.x) or is_nan(s.Dvvec.y) or is_nan(s.Dvvec.z)))
+		
 	# remaining calculation is of the torque on the glider
 	# the turning moment is resolved about the CGTotal position
-	var br = clamp(s.frot.z, -50, 50)
+	#var br = clamp(s.frot.z, -50, 50)
+	var br = s.frot.dot(-avecWingAxis)
+	br = clamp(br, -50, 50)
 		
 	# calculations directly from the oriented glider model to replace the above
 	var ACpos  = gliderpos.get_node("AeroCentre").global_transform.origin
@@ -126,9 +126,7 @@ func flightforcesstate(s, Lb, gliderpos):
 	var CGPpos = gliderpos.get_node("AeroCentre/TetherPoint/HangStrap/PilotBody").global_transform.origin
 	var CGTotalpos = (CGPpos*mpilot + CGWpos*mwing)/(mpilot + mwing)
 
-
 	var dyn    = 0.5*rho*vsq*S         # dynamic pressure
-
 	var Xw  = CGTotalpos.x - ACpos.x
 	var Cmq = -K*Clwa*cossweep*((((1/24)*(ARcu*tansweep*tansweep)/(AR + 6*cossweep)) + 1/8) + (AR*(2*(Xw/c) + 0.5*(Xw/c))/(AR+2*cossweep)))
 
@@ -139,38 +137,14 @@ func flightforcesstate(s, Lb, gliderpos):
 	var d   = ACpos.distance_to(CGTotalpos)
 	var Mq2 = -0.5*rho*Cdg*S*(-2*br*d*d*airspeed + br*br*d*d*d)
 
-	var dampingforceX = Mq + Mq2
-
-	# original matlab code
-	var XP  = CGPpos.x - CGTotalpos.x
-	var YP  = CGPpos.y - CGTotalpos.y
-	var Cx  = -Dcdg
-	var Cy  = lift
-	var DtorqueforceXpilotdrag = -(CGPpos - CGTotalpos).y*Dpilot # looks too simplified as well
-	var DtorqueforceXwingforce = -lift*(CGTotalpos - ACpos).x - Dcdg*(CGTotalpos - ACpos).y
-	var DtorqueforceXweight = mwing*g*(CGWpos - CGTotalpos).x + mpilot*g*(CGPpos - CGTotalpos).x   # should be zero
-	var DtorqueforceX = Cmo*dyn*c + DtorqueforceXweight + DtorqueforceXpilotdrag + DtorqueforceXwingforce
-	#var torqueforceX = Cmo*dyn*c + mwing*g*(CGWpos - CGTotalpos).x + mpilot*g*(CGPpos - CGTotalpos).x - YP*Dpilot - Cy*CGT[0] - Cx*(-CGT[1])
-	var Dbr = (DtorqueforceX + dampingforceX)/I
+	var dampingforceX = -avecWingAxis*(Mq + Mq2)
 	
-	# version using cross products
-	var avec = s.vvec.normalized()
 	var wingforceAC = avecLift*lift + avecDrag*Dcdg
 	var torqueforceXwingforce = (ACpos - CGTotalpos).cross(wingforceAC)
 	var torqueforceXpilotdrag = (CGPpos - CGTotalpos).cross(avecDrag*Dpilot)
 	var torqueforceX = Vector3(0,0,Cmo*dyn*c) + torqueforceXpilotdrag + torqueforceXwingforce
-	
-	Dcount -= 1
-	if Dcount == 0:
-		#print( - Cy*CGT[0] - 0*Cx*(-CGT[1]), " ", torqueforceXwingforce)
-		#print(torqueforceXweight, " ", torqueforceXwingforce, " ", torqueforceXwingforceD)
-		#print(torqueforceXwingforce, " ", torqueforceXpilotdrag)
-		#print(torqueforceX, " ", DtorqueforceX)
-		Dcount = 10
 
-	s.Dfrot = (torqueforceX + Vector3(0,0,dampingforceX))/I
-	#s.Dfrot = Vector3(0, 0, Dbr)
-	#torqueforceX = DtorqueforceX
+	s.Dfrot = (torqueforceX + dampingforceX)/I
 
 	
 
