@@ -25,6 +25,8 @@ var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
 export var stationary = false
 
+var altitudeshiftforPEcalc = 0
+
 func _process(delta):
 	if Input.is_action_just_pressed("ui_home") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
 		if recarvrorigin == null:
@@ -43,6 +45,12 @@ func _process(delta):
 	if Input.is_action_just_pressed("ui_page_down") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.XA):
 		takeoffstart()
 
+var energytimewindow = 0.25
+var energytimer = 0.0
+var prevtotalenergy = 0.0
+var sumdragenergy = 0.0
+var totalttime = 0
+var Nintegralsubsteps = 10
 func _physics_process(delta):
 	var camvec = -headcam.global_transform.basis.z
 	if is_nan(camvec.x):
@@ -61,8 +69,23 @@ func _physics_process(delta):
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
 
 	if mode == RigidBody.MODE_KINEMATIC:
-		gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
-		gliderdynamicstate.stepflight(delta, self)
+		var deltasubstep = delta/Nintegralsubsteps
+		for i in Nintegralsubsteps:
+			gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
+			gliderdynamicstate.stepflight(deltasubstep, self)
+			sumdragenergy += deltasubstep*gliderdynamicstate.dragworkdone()
+		
+		energytimer += delta
+		totalttime += delta
+		if energytimer > energytimewindow:
+			var potentialenergy = ($AeroCentre.global_transform.origin.y + altitudeshiftforPEcalc)*(gliderkinematics.mpilot + gliderkinematics.mwing)*gliderkinematics.g
+			var kineticenergy = gliderdynamicstate.kineticenergy(gliderkinematics)
+			var totalenergy = kineticenergy + potentialenergy
+			#print(totalttime, "    ", gliderdynamicstate.vvec.length(), "  ", 0.5*(90+22)*gliderdynamicstate.vvec.length_squared(), "     ", kineticenergy)
+			print(totalttime, " ", totalenergy, " Wattage ", (totalenergy-prevtotalenergy)/energytimer, " dragWatt ", sumdragenergy/energytimer)
+			prevtotalenergy = totalenergy
+			energytimer = 0.0
+
 		var kinematiccollision = $KinematicBody.move_and_collide(gliderdynamicstate.vvec*delta, true, true, true)
 		if kinematiccollision != null:
 			windNoise.stop()
@@ -82,8 +105,10 @@ func _physics_process(delta):
 		pass
 	elif recarvrorigin == null:
 		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*3:
+			altitudeshiftforPEcalc += transform.origin.y - orgpos.y
 			transform.origin = orgpos
 	elif abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*20:
+		altitudeshiftforPEcalc += transform.origin.y - orgpos.y
 		transform.origin = orgpos
 		
 	#label.set_label_text("Lb=%f\npitch=%f" % [Lb, rad2deg(gliderdynamicstate.fr)])
