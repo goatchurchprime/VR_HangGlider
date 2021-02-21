@@ -6,7 +6,8 @@ onready var headcam = get_node("../OQ_ARVROrigin/OQ_ARVRCamera")
 onready var label = get_node("../OQ_UILabel")
 onready var orgpos = transform.origin
 onready var windNoise = get_node("glider2/WindNoise3D")
-
+onready var gliderorigin = transform.origin
+		
 var gliderkinematics = null
 var gliderdynamicstate = null
 
@@ -45,7 +46,7 @@ func _process(delta):
 	if Input.is_action_just_pressed("ui_page_down") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.XA):
 		takeoffstart()
 
-var energytimewindow = 0.25
+var energytimewindow = 0.2
 var energytimer = 0.0
 var prevtotalenergy = 0.0
 var sumdragenergy = 0.0
@@ -72,9 +73,12 @@ func _physics_process(delta):
 		var deltasubstep = delta/Nintegralsubsteps
 		for i in Nintegralsubsteps:
 			gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
+			#gliderkinematics.flightforcesstateAntiRollOnly(gliderdynamicstate, Lb, self)
+			gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
 			gliderdynamicstate.stepflight(deltasubstep, self)
 			sumdragenergy += deltasubstep*gliderdynamicstate.dragworkdone()
-		
+		transform.origin = gliderorigin + Vector3(0, gliderdynamicstate.vvec.y*0.1, 0)
+			
 		energytimer += delta
 		totalttime += delta
 		if energytimer > energytimewindow:
@@ -82,7 +86,10 @@ func _physics_process(delta):
 			var kineticenergy = gliderdynamicstate.kineticenergy(gliderkinematics)
 			var totalenergy = kineticenergy + potentialenergy
 			#print(totalttime, "    ", gliderdynamicstate.vvec.length(), "  ", 0.5*(90+22)*gliderdynamicstate.vvec.length_squared(), "     ", kineticenergy)
-			print(totalttime, " ", totalenergy, " Wattage ", (totalenergy-prevtotalenergy)/energytimer, " dragWatt ", sumdragenergy/energytimer)
+			#print(totalttime, " ", totalenergy, " Wattage ", (totalenergy-prevtotalenergy)/energytimer, " dragWatt ", sumdragenergy/energytimer)
+			var Drollangle = atan2(gliderdynamicstate.Dwingrelativeairspeedvector.x, gliderdynamicstate.Dwingrelativeairspeedvector.y)
+			#print(totalttime, " r ", Drollangle, " av ", gliderdynamicstate.Dwingrelativeairspeedvector)
+			print(totalttime, " r ", Drollangle, gliderdynamicstate.Dfrot, gliderdynamicstate.frot)
 			prevtotalenergy = totalenergy
 			energytimer = 0.0
 

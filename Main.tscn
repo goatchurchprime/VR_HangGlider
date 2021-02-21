@@ -190,7 +190,7 @@ __meta__ = {
 [node name="OQ_UI2DLogWindow" parent="." instance=ExtResource( 12 )]
 
 [node name="gliderpos" type="RigidBody" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -23.9776, 6.47581, -25.8141 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.793352, 2.52042, -10.0855 )
 collision_layer = 2
 mode = 3
 contacts_reported = 1

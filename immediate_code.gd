@@ -15,7 +15,7 @@ class C:
 var c = C.new()
 func _run():
 	c.test(0.01667)
-	
+	print(sign(0))
 	#var frot = Vector3(0,0,0)
 	#var dt = 0.016667
 	#var Dfquat = Quat(frot.normalized(), frot.length()*dt)

@@ -46,6 +46,7 @@ class GliderDynamicState:
 	
 	# conservation of energy check value
 	var dragforce
+	var Dwingrelativeairspeedvector
 	
 	func _init():
 		var v  = 12               # initial airspeed (m/s)
@@ -53,12 +54,12 @@ class GliderDynamicState:
 		var alphr0 = deg2rad(20)  # initial angle of attack (alph=a+f)
 		var ar = deg2rad(-10)     # flight path angle (radians)
 		var fr = alphr0 + ar      # pitch attitude (radians)
-		var br = deg2rad(-5)       # Initial pitch rate attitude (radians/sec)
+		var br = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
 		var attituderot = Vector3(1,0,0)
 		fquat  = hquat*Quat(attituderot.normalized(), -fr)
 		var hvec = hquat.xform(Vector3(0,0,1))
 		vvec   = v*Vector3(cos(ar)*hvec.x, sin(ar), cos(ar)*hvec.z)
-		frot   = Vector3(0,0,br)
+		frot   = Vector3(0.1, 0, br)
 		
 	func stepflight(dt, gliderpos):
 		frot += Dfrot*dt
@@ -72,7 +73,6 @@ class GliderDynamicState:
 			vvec *= 50/vvec.length()
 		if frot.length() > 5:
 			frot *= 5/frot.length()
-			
 		setgliderpos(gliderpos, gliderpos.transform.origin + vvec*dt)
 
 	func setgliderpos(gliderpos, bpos):
@@ -110,10 +110,16 @@ func flightforcesstate(s, Lb, gliderpos):
 	var avecWingAxis = gliderpos.get_node("AeroCentre").global_transform.basis.x
 	var avecLift = avecWingAxis.cross(avecDrag)
 
+	# printing this value feels like Z is direction of flight, Y is up and X is along the wing!
 	var wingrelativeairspeedvector = s.fquat.inverse().xform(airspeedvector)
+	s.Dwingrelativeairspeedvector = wingrelativeairspeedvector
 	var alpha = -atan2(-wingrelativeairspeedvector.y, -wingrelativeairspeedvector.z)
-	alpha  = clamp(alpha, deg2rad(-35), deg2rad(35))
 
+	var rollangle = atan2(wingrelativeairspeedvector.x, wingrelativeairspeedvector.y)
+	var antirolltorque = Vector3(402*clamp(-rollangle*50, -50, 50), 0, 0)
+	var rolldamptorque = Vector3(-6000*s.frot.x*abs(s.frot.x), 0, 0)
+		
+	alpha = clamp(alpha, deg2rad(-35), deg2rad(35))
 	var alphasq= alpha*alpha
 	var alphacu= alpha*alphasq 
 	var Clift  = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
@@ -166,9 +172,26 @@ func flightforcesstate(s, Lb, gliderpos):
 	var torqueforceXpilotdrag = (CGPpos - CGTotalpos).cross(avecDrag*Dpilot)
 	var torqueforceX = Vector3(0,0,Cmo*dyn*c) + torqueforceXpilotdrag + torqueforceXwingforce
 
-	s.Dfrot = (torqueforceX + dampingforceX)/I
+	s.Dfrot = (antirolltorque + rolldamptorque + torqueforceX + dampingforceX)/I
 
 	s.dragforce = drag
 	
 
+# Y is up, X is direction of flight, Z is along the wing
+func flightforcesstateAntiRollOnly(s, Lb, gliderpos):
+	var airspeedvector = localwindvector - s.vvec
+	var avecDrag = airspeedvector.normalized()
+	var avecWingAxis = gliderpos.get_node("AeroCentre").global_transform.basis.x
+	var avecLift = avecWingAxis.cross(avecDrag)
+
+	# printing this value feels like Z is direction of flight, Y is up and X is along the wing!
+	var wingrelativeairspeedvector = s.fquat.inverse().xform(airspeedvector)
+	s.Dwingrelativeairspeedvector = wingrelativeairspeedvector
+	var alpha = -atan2(-wingrelativeairspeedvector.y, -wingrelativeairspeedvector.z)
+	var rollangle = atan2(wingrelativeairspeedvector.x, wingrelativeairspeedvector.y)
+	var antirolltorque = Vector3(102*clamp(-rollangle*50, -50, 50), 0, 0)
+	var rolldamptorque = Vector3(-50*s.frot.x, 0, 0)
+	s.Dvvec = Vector3(0,0,0)
+	s.Dfrot = (antirolltorque + rolldamptorque)/I
+	
 
