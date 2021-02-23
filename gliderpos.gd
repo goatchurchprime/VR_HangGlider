@@ -8,18 +8,18 @@ onready var orgpos = transform.origin
 onready var windNoise = get_node("glider2/WindNoise3D")
 onready var gliderorigin = transform.origin
 		
-var gliderkinematics = null
-var gliderdynamicstate = null
+onready var gliderkinematics = $gliderkinematics
+onready var gliderdynamicstate = $gliderdynamicstate
 
 func takeoffstart():
 	mode = RigidBody.MODE_KINEMATIC
 	transform.origin = orgpos
-	gliderdynamicstate = gliderkinematics.initgliderstate()
+	gliderkinematics.initgliderstate($AeroCentre)
 	gliderdynamicstate.setgliderpos(self, transform.origin)
 	windNoise.play()
 
 func _ready():
-	gliderkinematics = load("res://gliderkinematics.gd").new($AeroCentre)
+	print($gliderkinematics.phi)
 	takeoffstart()
 	
 var recarvrorigin = null

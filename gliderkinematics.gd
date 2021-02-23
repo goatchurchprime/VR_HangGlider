@@ -32,79 +32,18 @@ var phi     = deg2rad(14)   # angle in degrees between the downtube and the axis
 var localwindvector = Vector3(0, 0, 0)
 const hquat   = Quat(Vector3(0,1,0), deg2rad(90))  # horizontal heading transform (z+ forward)
 
-var useDvvec = true
+onready var wingdynamics = $gliderwingdynamics
 
-var wingdynamics = load("gliderwingdynamics.gd").new()
 
-class GliderDynamicState:
-	# 3D interpretations of the state
-	var fquat  # full glider attitude (derived from br)
-	var vvec   # vector of flight
-	var frot   # rotation vector applied to the fquat
 	
-	# values calculated by flightforcesstate()
-	var Dvvec  # flight velocity acceleration (derived from Dv, Dar)
-	var Dfrot  # rate of rotation to add to the frot 
-	
-	# conservation of energy check value
-	var dragforce
-	var Dwingrelativeairspeedvector
-	
-	func _init():
-		var v  = 12               # initial airspeed (m/s)
-		#v = 0
-		var alphr0 = deg2rad(20)  # initial angle of attack (alph=a+f)
-		var ar = deg2rad(-10)     # flight path angle (radians)
-		var fr = alphr0 + ar      # pitch attitude (radians)
-		var br = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
-		var attituderot = Vector3(1,0,0)
-		fquat  = hquat*Quat(attituderot.normalized(), -fr)
-		var hvec = hquat.xform(Vector3(0,0,1))
-		vvec   = v*Vector3(cos(ar)*hvec.x, sin(ar), cos(ar)*hvec.z)
-		frot   = Vector3(0.0, 0.0, br)
-		
-	func stepflight(dt, gliderpos):
-		frot += Dfrot*dt
-		vvec += Dvvec*dt
-		if frot != Vector3(0,0,0):
-			var Dfquat = Quat(frot.normalized(), frot.length()*dt)
-			#Dfquat = Quat(Vector3(0,0,1), frot.z*dt)
-			fquat = Dfquat*fquat
-		# clamp the rotation and the velocity
-		if vvec.length() > 50:
-			vvec *= 50/vvec.length()
-		if frot.length() > 5:
-			frot *= 5/frot.length()
-		setgliderpos(gliderpos, gliderpos.transform.origin + vvec*dt)
-
-	func setgliderpos(gliderpos, bpos):
-		gliderpos.transform = Transform(Basis(fquat), bpos)
-		assert (not (is_nan(gliderpos.transform.basis.x.x) or is_nan(gliderpos.transform.basis.x.y) or is_nan(gliderpos.transform.basis.x.z)))
-		var NosePoint = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint")
-		var VelocityVector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
-		if vvec.x != 0 or vvec.z != 0:
-			VelocityVector.global_transform = NosePoint.global_transform.looking_at(NosePoint.global_transform.origin+vvec, Vector3(0,1,0))
-		VelocityVector.scale.z = vvec.length()
-		gliderpos.get_node("AeroCentre/PitchRate").rotation_degrees.x = rad2deg(-frot.z)
-
-	func kineticenergy(k):
-		var linearenergy = 0.5*(k.mpilot + k.mwing)*vvec.length_squared()
-		var angularenergy = 0.5*k.I*frot.length_squared()
-		return linearenergy + 0*angularenergy
-		
-	func dragworkdone():
-		return dragforce*vvec.length() # + rotational drag?
-
-func _init(AeroCentre):
+func initgliderstate(AeroCentre):
 	h      = -AeroCentre.get_node("TetherPoint/HangStrap/PilotBody").transform.origin.y
 	tpdist = AeroCentre.get_node("TetherPoint").transform.origin.z
 	phi    = deg2rad(-AeroCentre.get_node("TetherPoint/AframeBisector").rotation_degrees.x)
 	cgdist = AeroCentre.get_node("TetherPoint/CGWing").transform.origin.z
 	c      = tpdist*100/8.5
 	wingdynamics.c = c
-	
-func initgliderstate():
-	return GliderDynamicState.new()
+
 
 var Dcount = 0
 func flightforcesstate(s, gliderpos):
