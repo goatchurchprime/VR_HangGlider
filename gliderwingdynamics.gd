@@ -18,6 +18,9 @@ var ARcu    = AR*AR*AR
 var tansweep= tan(sweep)
 var cossweep= cos(sweep)
 
+# Note: Z+ points along the nose of the glider, and Y+ is the kingpost
+# airvelocity is incoming towards the nose, 
+# therefore to the first approximation it is (0, 1, 10) m/s
 func linearforce(airvelocity):
 	var alpha = -atan2(-airvelocity.y, -airvelocity.z)
 	alpha = clamp(alpha, deg2rad(-35), deg2rad(35))
@@ -46,8 +49,6 @@ func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, hvec):
 	var dyn    = 0.5*rho*vsq*S         # dynamic pressure
 	var Xw     = -hvec.dot(CGtoACvec)
 
-
-		# VV This is an error because 1/24 evaluates to 0
 	var CmqA = (((1.0/24)*(ARcu*tansweep*tansweep)/(AR + 6*cossweep)) + 1.0/8)
 	var CmqB = (AR*(2*(Xw/c) + 0.5*(Xw/c))/(AR+2*cossweep))
 	var Cmq  = -K*Clwa*cossweep*(CmqA + CmqB)
