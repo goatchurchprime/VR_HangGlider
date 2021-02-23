@@ -59,7 +59,8 @@ func _physics_process(delta):
 		return
 	
 	var controllerdisp = pitchcontroller.global_transform.origin - headcam.global_transform.origin
-	var handdist = Vector3(camvec.x, 0, camvec.z).normalized().dot(controllerdisp)	
+	var handdist = Vector3(camvec.x, 0, camvec.z).normalized().dot(controllerdisp)
+	var handside = Vector3(-camvec.z, 0, camvec.x).normalized().dot(controllerdisp)
 	if recarvrorigin != null:  # in flight hand disp needs to be in direction of flight or it responds to head turning
 		var controlframeheading = $AeroCentre/TetherPoint/AframeBisector.global_transform.basis.z
 		handdist = controlframeheading.dot(controllerdisp)
@@ -67,17 +68,20 @@ func _physics_process(delta):
 	var h = gliderkinematics.h
 	var Lb = clamp(-handdist, -h*0.9, h*0.9)
 	var epsilon = rad2deg(atan(Lb/h))   # probably should be asin
+	var Ls = clamp(-handside, -h*0.6, h*0.6)
+	var epsilonI = rad2deg(asin(Ls/h))
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
+	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.z = epsilonI
+	
 
 	if mode == RigidBody.MODE_KINEMATIC:
 		var deltasubstep = delta/Nintegralsubsteps
 		for i in Nintegralsubsteps:
-			gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
-			#gliderkinematics.flightforcesstateAntiRollOnly(gliderdynamicstate, Lb, self)
-			gliderkinematics.flightforcesstate(gliderdynamicstate, Lb, self)
+			gliderkinematics.flightforcesstate(gliderdynamicstate, self)
 			gliderdynamicstate.stepflight(deltasubstep, self)
 			sumdragenergy += deltasubstep*gliderdynamicstate.dragworkdone()
-		transform.origin = gliderorigin + Vector3(0, gliderdynamicstate.vvec.y*0.1, 0)
+
+		transform.origin = gliderorigin + gliderdynamicstate.vvec*0.1 # Vector3(0, gliderdynamicstate.vvec.y*0.1, 0)
 			
 		energytimer += delta
 		totalttime += delta
@@ -99,9 +103,6 @@ func _physics_process(delta):
 			mode = RigidBody.MODE_RIGID
 			linear_velocity = gliderdynamicstate.vvec
 			
-	#Link wind noise volume and pitch to glider velocity
-	#lb range = -0.6 (push out) to 0.2 (pull in)
-
 	var windVolume = gliderdynamicstate.vvec.length() * 5 - 30 # 2.5 - 40
 	windNoise.unit_db = windVolume 
 	var windPitch = gliderdynamicstate.vvec.length() * 0.08 -.1#-.4

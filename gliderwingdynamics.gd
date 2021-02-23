@@ -37,17 +37,18 @@ func linearforce(airvelocity):
 
 	return avecLift*lift + avecDrag*Dcdg
 		
-
-func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, Xw):
+var Dcount = 0
+func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, hvec):
 	var airspeed = clamp(airvelocity.length(), 0, 30)
 	var vsq    = airspeed*airspeed
 	var br     = clamp(-wfrot.x, -50, 50)
 		
 	var dyn    = 0.5*rho*vsq*S         # dynamic pressure
-	#var Xw     = -CGtoACvec.z
+	var Xw     = -hvec.dot(CGtoACvec)
+
 
 		# VV This is an error because 1/24 evaluates to 0
-	var CmqA = (((1/24)*(ARcu*tansweep*tansweep)/(AR + 6*cossweep)) + 1/8)
+	var CmqA = (((1.0/24)*(ARcu*tansweep*tansweep)/(AR + 6*cossweep)) + 1.0/8)
 	var CmqB = (AR*(2*(Xw/c) + 0.5*(Xw/c))/(AR+2*cossweep))
 	var Cmq  = -K*Clwa*cossweep*(CmqA + CmqB)
 
@@ -67,13 +68,20 @@ func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, Xw):
 	var dampingforceX = (Mq + Mq2)
 
 	var rollangle      = atan2(airvelocity.x, airvelocity.y)
-	var antirolltorque = 402*clamp(-rollangle*50, -50, 50)
+	var antirolltorque = 802*clamp(-rollangle*50, -50, 50)
 	var rolldamptorque = -46000*wfrot.z*abs(wfrot.z)
-	#antirolltorque = 0
-	#rolldamptorque = 0
 		
+	var yawangle      = atan2(-airvelocity.x, -airvelocity.z)
+	var antiyawtorque = 42*clamp(-yawangle*50, -50, 50)
+	var yawdamptorque = -4600*wfrot.y*abs(wfrot.y)
+	
+	Dcount += 1
+	if Dcount == 800:
+		print("yaw  ", yawangle, "  ", antiyawtorque, " ", yawdamptorque)
+		Dcount = 0
+
 	var torqueforceXwingforce = -CGtoACvec.cross(linearforce)
 	var torqueforceX = Cmo*dyn*c
 	var Dtw = torqueforceXwingforce.x + torqueforceX
 	var Dtw1 = Dtw + dampingforceX
-	return -torqueforceXwingforce + Vector3(-torqueforceX - dampingforceX, 0, antirolltorque + rolldamptorque)
+	return -torqueforceXwingforce + Vector3(-torqueforceX - dampingforceX, antiyawtorque + yawdamptorque, antirolltorque + rolldamptorque)
