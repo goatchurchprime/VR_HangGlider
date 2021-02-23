@@ -89,7 +89,7 @@ func _physics_process(delta):
 			#print(totalttime, " ", totalenergy, " Wattage ", (totalenergy-prevtotalenergy)/energytimer, " dragWatt ", sumdragenergy/energytimer)
 			var Drollangle = atan2(gliderdynamicstate.Dwingrelativeairspeedvector.x, gliderdynamicstate.Dwingrelativeairspeedvector.y)
 			#print(totalttime, " r ", Drollangle, " av ", gliderdynamicstate.Dwingrelativeairspeedvector)
-			print(totalttime, " r ", Drollangle, gliderdynamicstate.Dfrot, gliderdynamicstate.frot)
+			#print(totalttime, " r ", Drollangle, gliderdynamicstate.Dfrot, gliderdynamicstate.frot)
 			prevtotalenergy = totalenergy
 			energytimer = 0.0
 

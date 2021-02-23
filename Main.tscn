@@ -22,7 +22,7 @@
 size = Vector2( 10, 10 )
 
 [sub_resource type="OpenSimplexNoise" id=2]
-period = 29.5
+period = 34.7
 
 [sub_resource type="NoiseTexture" id=3]
 noise = SubResource( 2 )
@@ -190,7 +190,7 @@ __meta__ = {
 [node name="OQ_UI2DLogWindow" parent="." instance=ExtResource( 12 )]
 
 [node name="gliderpos" type="RigidBody" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.793352, 2.52042, -10.0855 )
+transform = Transform( 1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, 0.793352, 2.52042, -10.0855 )
 collision_layer = 2
 mode = 3
 contacts_reported = 1
@@ -198,7 +198,7 @@ contact_monitor = true
 script = ExtResource( 18 )
 
 [node name="glider2" parent="gliderpos" instance=ExtResource( 15 )]
-transform = Transform( 1, 0, 0, 0, 0.996195, -0.0871557, 0, 0.0871557, 0.996195, -0.026907, -1.53486, 0.682842 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.026907, -1.53486, 0.682842 )
 
 [node name="WindNoise3D" type="AudioStreamPlayer3D" parent="gliderpos/glider2"]
 transform = Transform( 1, 0, 0, 0, 1, -2.23517e-08, 0, 1.49012e-08, 1, 0, 0.304175, 3.47675 )
