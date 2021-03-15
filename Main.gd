@@ -2,10 +2,12 @@ extends Spatial
 
 var info_text = """Hello there
 """
+export var vrenabled = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	vr.initialize()
+	if vrenabled:
+		vr.initialize()
 	$OQ_UILabel.set_label_text(info_text);
 	pass
 

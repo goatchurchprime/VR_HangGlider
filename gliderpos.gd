@@ -11,6 +11,9 @@ onready var gliderorigin = transform.origin
 onready var gliderkinematics = $gliderkinematics
 onready var gliderdynamicstate = $gliderdynamicstate
 
+export var constraintopitch_andYZplane_only = true
+#export var stationary = true
+
 func takeoffstart():
 	mode = RigidBody.MODE_KINEMATIC
 	transform.origin = orgpos
@@ -24,7 +27,7 @@ func _ready():
 	
 var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
-export var stationary = false
+
 
 var altitudeshiftforPEcalc = 0
 
@@ -78,6 +81,8 @@ func _physics_process(delta):
 		var deltasubstep = delta/Nintegralsubsteps
 		for i in Nintegralsubsteps:
 			gliderkinematics.flightforcesstate(gliderdynamicstate, self)
+			if constraintopitch_andYZplane_only:
+				gliderdynamicstate.constraintoYZplane()
 			gliderdynamicstate.stepflight(deltasubstep, self)
 			sumdragenergy += deltasubstep*gliderdynamicstate.dragworkdone()
 

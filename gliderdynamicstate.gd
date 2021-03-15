@@ -1,8 +1,10 @@
 extends Node
 
 # 3D interpretations of the state
-var fquat = Quat(-0.061628, 0.704416, 0.061628, 0.704416) # full glider attitude (derived from br)
-var vvec = Vector3(11.817692, -2.083778, 0.000001)  # vector of flight
+#var fquat = Quat(-0.061628, 0.704416, 0.061628, 0.704416) # full glider attitude (derived from br)
+# These numbers aren't used, they're reset in the init()!!!
+var fquat = Quat(Vector3(1,0,0), deg2rad(20)) # full glider attitude (derived from br)
+var vvec = Vector3(0, -2.083778, 11.817692)  # vector of flight
 var frot = Vector3(0, 0, 0)   # rotation vector applied to the fquat
 
 # values calculated by flightforcesstate()
@@ -22,10 +24,13 @@ func _init():
 	var br = deg2rad(0)       # Initial pitch rate attitude (radians/sec)
 	var attituderot = Vector3(1,0,0)
 	var hquat   = Quat(Vector3(0,1,0), deg2rad(90))  # horizontal heading transform (z+ forward)
+
+	hquat = Quat()
 	fquat  = hquat*Quat(attituderot.normalized(), -fr)
 	var hvec = hquat.xform(Vector3(0,0,1))
 	vvec   = v*Vector3(cos(ar)*hvec.x, sin(ar), cos(ar)*hvec.z)
 	frot   = Vector3(0.0, 0.0, br)
+
 	print(fquat, vvec, frot)
 	
 func stepflight(dt, gliderpos):
@@ -51,6 +56,13 @@ func setgliderpos(gliderpos, bpos):
 		VelocityVector.global_transform = NosePoint.global_transform.looking_at(NosePoint.global_transform.origin+vvec, Vector3(0,1,0))
 	VelocityVector.scale.z = vvec.length()
 	gliderpos.get_node("AeroCentre/PitchRate").rotation_degrees.x = rad2deg(-frot.z)
+
+func constraintoYZplane():
+	Dvvec.x = 0
+	Dfrot.y = 0
+	Dfrot.z = 0
+	vvec.x = 0  # unnecessary if already aligned
+	fquat = Quat(fquat.x, 0, 0, fquat.w).normalized()  # unnecessary if already aligned
 
 func kineticenergy(k):
 	var linearenergy = 0.5*(k.mpilot + k.mwing)*vvec.length_squared()
