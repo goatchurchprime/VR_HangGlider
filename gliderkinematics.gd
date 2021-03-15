@@ -40,7 +40,7 @@ func initgliderstate(AeroCentre):
 	h      = -AeroCentre.get_node("TetherPoint/HangStrap/PilotBody").transform.origin.y
 	tpdist = AeroCentre.get_node("TetherPoint").transform.origin.z
 	phi    = deg2rad(-AeroCentre.get_node("TetherPoint/AframeBisector").rotation_degrees.x)
-	cgdist = AeroCentre.get_node("TetherPoint/CGWing").transform.origin.z
+	cgdist = AeroCentre.get_node("CGWing").transform.origin.z
 	c      = tpdist*100/8.5
 	wingdynamics.c = c
 
@@ -48,7 +48,7 @@ func initgliderstate(AeroCentre):
 var Dcount = 0
 func flightforcesstate(s, gliderpos):
 	var ACpos  = gliderpos.get_node("AeroCentre").global_transform.origin
-	var CGWpos = gliderpos.get_node("AeroCentre/TetherPoint/CGWing").global_transform.origin
+	var CGWpos = gliderpos.get_node("AeroCentre/CGWing").global_transform.origin
 	var CGPpos = gliderpos.get_node("AeroCentre/TetherPoint/HangStrap/PilotBody").global_transform.origin
 	var CGTotalpos = (CGPpos*mpilot + CGWpos*mwing)/(mpilot + mwing)
 

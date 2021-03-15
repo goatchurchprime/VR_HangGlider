@@ -18,11 +18,14 @@ var ARcu    = AR*AR*AR
 var tansweep= tan(sweep)
 var cossweep= cos(sweep)
 
+var alphavaluesaved = 0.0
+
 # Note: Z+ points along the nose of the glider, and Y+ is the kingpost
 # airvelocity is incoming towards the nose, 
 # therefore to the first approximation it is (0, 1, 10) m/s
 func linearforce(airvelocity):
 	var alpha = -atan2(-airvelocity.y, -airvelocity.z)
+	alphavaluesaved = alpha
 	alpha = clamp(alpha, deg2rad(-35), deg2rad(35))
 	var alphasq  = alpha*alpha
 	var alphacu  = alpha*alphasq 

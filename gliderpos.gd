@@ -4,12 +4,18 @@ onready var pitchcontroller = get_node("../OQ_ARVROrigin/OQ_RightController")
 onready var arvrorigin = get_node("../OQ_ARVROrigin")
 onready var headcam = get_node("../OQ_ARVROrigin/OQ_ARVRCamera")
 onready var label = get_node("../OQ_UILabel")
+
+onready var labelvelocity = get_node("../OQ_UI2DCanvas").ui_control.get_node("airspeed")
+onready var labelsinkrate = get_node("../OQ_UI2DCanvas").ui_control.get_node("sinkrate")
+onready var labelangleofattack = get_node("../OQ_UI2DCanvas").ui_control.get_node("angleofattack")
+
 onready var orgpos = transform.origin
 onready var windNoise = get_node("glider2/WindNoise3D")
 onready var gliderorigin = transform.origin
 		
 onready var gliderkinematics = $gliderkinematics
 onready var gliderdynamicstate = $gliderdynamicstate
+onready var gliderwingdynamics = $gliderkinematics/gliderwingdynamics
 
 export var constraintopitch_andYZplane_only = true
 #export var stationary = true
@@ -112,7 +118,12 @@ func _physics_process(delta):
 	windNoise.unit_db = windVolume 
 	var windPitch = gliderdynamicstate.vvec.length() * 0.08 -.1#-.4
 	windNoise.pitch_scale = windPitch
+	
 	label.set_label_text("Lb=%f\nvolume=%f" % [Lb, rad2deg(windVolume)])
+	labelvelocity.text = "%.2f" % gliderdynamicstate.vvec.length()
+	labelsinkrate.text = "%.2f" % (-gliderdynamicstate.vvec.y)
+	labelsinkrate.text = "%.2f" % (-gliderdynamicstate.vvec.y)
+	labelangleofattack.text = "%.1f" % rad2deg(gliderwingdynamics.alphavaluesaved)
 	
 	if mode == RigidBody.MODE_RIGID:
 		pass

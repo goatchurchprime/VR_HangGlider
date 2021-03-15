@@ -80,7 +80,7 @@ size = Vector3( 0.02, 2, 0.02 )
 albedo_color = Color( 0.960784, 0.945098, 0.0705882, 1 )
 
 [sub_resource type="CubeMesh" id=17]
-size = Vector3( 0.02, 2.4, 0.02 )
+size = Vector3( 0.02, 2.8, 0.02 )
 
 [sub_resource type="CapsuleMesh" id=18]
 radius = 0.1
@@ -97,6 +97,12 @@ height = 0.21
 
 [sub_resource type="SpatialMaterial" id=21]
 albedo_color = Color( 0.054902, 0.705882, 0.905882, 1 )
+
+[sub_resource type="PrismMesh" id=28]
+size = Vector3( 0.05, 0.05, 1.5 )
+
+[sub_resource type="SpatialMaterial" id=29]
+albedo_color = Color( 0.890196, 0.0431373, 0.960784, 1 )
 
 [sub_resource type="SphereMesh" id=22]
 radius = 0.02
@@ -117,12 +123,6 @@ size = Vector3( 0.02, 0.02, 1 )
 
 [sub_resource type="SpatialMaterial" id=27]
 albedo_color = Color( 0.0235294, 0.6, 0.945098, 1 )
-
-[sub_resource type="PrismMesh" id=28]
-size = Vector3( 0.1, 0.1, 1.5 )
-
-[sub_resource type="SpatialMaterial" id=29]
-albedo_color = Color( 0.890196, 0.0431373, 0.960784, 1 )
 
 [sub_resource type="BoxShape" id=30]
 extents = Vector3( 4, 0.8, 1 )
@@ -169,29 +169,85 @@ mesh = SubResource( 8 )
 material/0 = null
 
 [node name="OQ_UILabel" parent="." instance=ExtResource( 6 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.173055, 1.45623, -1.86872 )
+transform = Transform( 0.085156, 0, -0.996368, 0, 1, 0, 0.996368, 0, 0.085156, -4.58979, 1.45623, -8.99209 )
 
 [node name="OQ_UI2DCanvas" parent="." instance=ExtResource( 11 )]
-transform = Transform( 0.818411, 0, -0.574634, 0, 1, 0, 0.574634, 0, 0.818411, 1.14703, 1.38333, -1.53757 )
-editor_live_update = false
-transparent = false
+transform = Transform( -0.0314147, 0, -2.99984, 0, 3, 0, 2.99984, 0, -0.0314147, -7.07046, 1.39432, -10.7928 )
 
 [node name="ReferenceRect" type="ReferenceRect" parent="OQ_UI2DCanvas"]
 margin_right = 200.0
-margin_bottom = 200.0
+margin_bottom = 100.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Button" type="Button" parent="OQ_UI2DCanvas/ReferenceRect"]
-margin_right = 108.0
-margin_bottom = 66.0
+visible = false
+margin_left = 91.9239
+margin_top = 134.35
+margin_right = 199.924
+margin_bottom = 200.35
 text = "Go!"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Label" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 9.05875
+margin_top = 28.3678
+margin_right = 49.0587
+margin_bottom = 42.3678
+text = "|v|: "
+
+[node name="airspeed" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 37.343
+margin_top = 29.782
+margin_right = 100.343
+margin_bottom = 43.782
+text = "0.0"
+
+[node name="Label2" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 7.64455
+margin_top = 47.4596
+margin_right = 47.6445
+margin_bottom = 61.4596
+text = "sink: "
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sinkrate" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 39.4644
+margin_top = 48.1667
+margin_right = 102.464
+margin_bottom = 62.1667
+text = "0.0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label3" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 10.473
+margin_top = 63.7231
+margin_right = 50.473
+margin_bottom = 77.7231
+text = "AoA:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="angleofattack" type="Label" parent="OQ_UI2DCanvas/ReferenceRect"]
+margin_left = 42.9999
+margin_top = 66.5515
+margin_right = 106.0
+margin_bottom = 80.5515
+text = "0.0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="OQ_UI2DLogWindow" parent="." instance=ExtResource( 12 )]
+transform = Transform( -0.080773, 0, -0.996733, 0, 1, 0, 0.996733, 0, -0.080773, -5.50922, -5.96046e-08, -13.4371 )
 
 [node name="gliderpos" type="RigidBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.793352, 2.52042, -10.0855 )
@@ -247,7 +303,7 @@ mesh = SubResource( 17 )
 material/0 = null
 
 [node name="PilotBody" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/HangStrap"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4, 0 )
 mesh = SubResource( 18 )
 material/0 = SubResource( 19 )
 
@@ -256,27 +312,27 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.45 )
 mesh = SubResource( 20 )
 material/0 = SubResource( 21 )
 
-[node name="CGWing" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06 )
-cast_shadow = 0
-mesh = SubResource( 22 )
-material/0 = SubResource( 23 )
-
-[node name="NosePoint" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.43782 )
-cast_shadow = 0
-mesh = SubResource( 24 )
-material/0 = SubResource( 25 )
-
-[node name="VelocityVector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint/NosePoint"]
-cast_shadow = 0
-mesh = SubResource( 26 )
-material/0 = SubResource( 27 )
-
 [node name="PitchRate" type="MeshInstance" parent="gliderpos/AeroCentre"]
 cast_shadow = 0
 mesh = SubResource( 28 )
 material/0 = SubResource( 29 )
+
+[node name="CGWing" type="MeshInstance" parent="gliderpos/AeroCentre"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.221001 )
+cast_shadow = 0
+mesh = SubResource( 22 )
+material/0 = SubResource( 23 )
+
+[node name="NosePoint" type="MeshInstance" parent="gliderpos/AeroCentre"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.59882 )
+cast_shadow = 0
+mesh = SubResource( 24 )
+material/0 = SubResource( 25 )
+
+[node name="VelocityVector" type="MeshInstance" parent="gliderpos/AeroCentre/NosePoint"]
+cast_shadow = 0
+mesh = SubResource( 26 )
+material/0 = SubResource( 27 )
 
 [node name="CollisionShape" type="CollisionShape" parent="gliderpos"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.687679, 0 )

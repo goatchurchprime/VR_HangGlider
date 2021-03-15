@@ -50,8 +50,8 @@ func stepflight(dt, gliderpos):
 func setgliderpos(gliderpos, bpos):
 	gliderpos.transform = Transform(Basis(fquat), bpos)
 	assert (not (is_nan(gliderpos.transform.basis.x.x) or is_nan(gliderpos.transform.basis.x.y) or is_nan(gliderpos.transform.basis.x.z)))
-	var NosePoint = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint")
-	var VelocityVector = gliderpos.get_node("AeroCentre/TetherPoint/NosePoint/VelocityVector")
+	var NosePoint = gliderpos.get_node("AeroCentre/NosePoint")
+	var VelocityVector = gliderpos.get_node("AeroCentre/NosePoint/VelocityVector")
 	if vvec.x != 0 or vvec.z != 0:
 		VelocityVector.global_transform = NosePoint.global_transform.looking_at(NosePoint.global_transform.origin+vvec, Vector3(0,1,0))
 	VelocityVector.scale.z = vvec.length()
