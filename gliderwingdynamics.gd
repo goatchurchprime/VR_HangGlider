@@ -29,8 +29,10 @@ func linearforce(airvelocity):
 	alpha = clamp(alpha, deg2rad(-35), deg2rad(35))
 	var alphasq  = alpha*alpha
 	var alphacu  = alpha*alphasq 
-	var Clift    = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
-	var Cdg      = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	#var Clift    = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
+	#var Cdg      = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	var Clift    = -0.75715*alphacu + 0.48844*alphasq + 2.9383*alpha + 0.097839
+	var Cdg      = -1.061965*alphacu + 0.73656*alphasq - 0.044846*alpha + 0.021052
 
 	# resolution of the forces
 	var airspeed = clamp(airvelocity.length(), 0, 30)
@@ -64,8 +66,10 @@ func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, hvec):
 	alpha      = clamp(alpha, deg2rad(-35), deg2rad(35))
 	var alphasq= alpha*alpha
 	var alphacu = alpha*alphasq 
-	var Clift   = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
-	var Cdg     = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	#var Clift    = -16.6*alphacu + 11.48*alphasq + 1.3*alpha + 0.038
+	#var Cdg      = 7.07*alphacu - 4.68*alphasq + 1.1*alpha - 0.0144
+	var Clift    = -0.75715*alphacu + 0.48844*alphasq + 2.9383*alpha + 0.097839
+	var Cdg      = -1.061965*alphacu + 0.73656*alphasq - 0.044846*alpha + 0.021052
 	var d       = CGtoACvec.length()
 	var Mq2     = -0.5*rho*Cdg*S*(-2*br*d*d*airspeed + br*br*d*d*d)
 

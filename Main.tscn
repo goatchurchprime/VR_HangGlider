@@ -98,30 +98,30 @@ height = 0.21
 [sub_resource type="SpatialMaterial" id=21]
 albedo_color = Color( 0.054902, 0.705882, 0.905882, 1 )
 
-[sub_resource type="PrismMesh" id=28]
+[sub_resource type="PrismMesh" id=22]
 size = Vector3( 0.05, 0.05, 1.5 )
 
-[sub_resource type="SpatialMaterial" id=29]
+[sub_resource type="SpatialMaterial" id=23]
 albedo_color = Color( 0.890196, 0.0431373, 0.960784, 1 )
 
-[sub_resource type="SphereMesh" id=22]
+[sub_resource type="SphereMesh" id=24]
 radius = 0.02
 height = 0.2
 
-[sub_resource type="SpatialMaterial" id=23]
+[sub_resource type="SpatialMaterial" id=25]
 albedo_color = Color( 0.972549, 0.980392, 0.0705882, 1 )
 
-[sub_resource type="SphereMesh" id=24]
+[sub_resource type="SphereMesh" id=26]
 radius = 0.05
 height = 0.2
 
-[sub_resource type="SpatialMaterial" id=25]
+[sub_resource type="SpatialMaterial" id=27]
 albedo_color = Color( 0.945098, 0.909804, 0.0313726, 1 )
 
-[sub_resource type="CubeMesh" id=26]
+[sub_resource type="CubeMesh" id=28]
 size = Vector3( 0.02, 0.02, 1 )
 
-[sub_resource type="SpatialMaterial" id=27]
+[sub_resource type="SpatialMaterial" id=29]
 albedo_color = Color( 0.0235294, 0.6, 0.945098, 1 )
 
 [sub_resource type="BoxShape" id=30]
@@ -173,6 +173,8 @@ transform = Transform( 0.085156, 0, -0.996368, 0, 1, 0, 0.996368, 0, 0.085156, -
 
 [node name="OQ_UI2DCanvas" parent="." instance=ExtResource( 11 )]
 transform = Transform( -0.0314147, 0, -2.99984, 0, 3, 0, 2.99984, 0, -0.0314147, -7.07046, 1.39432, -10.7928 )
+editor_live_update = false
+transparent = false
 
 [node name="ReferenceRect" type="ReferenceRect" parent="OQ_UI2DCanvas"]
 margin_right = 200.0
@@ -314,25 +316,25 @@ material/0 = SubResource( 21 )
 
 [node name="PitchRate" type="MeshInstance" parent="gliderpos/AeroCentre"]
 cast_shadow = 0
-mesh = SubResource( 28 )
-material/0 = SubResource( 29 )
+mesh = SubResource( 22 )
+material/0 = SubResource( 23 )
 
 [node name="CGWing" type="MeshInstance" parent="gliderpos/AeroCentre"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.221001 )
 cast_shadow = 0
-mesh = SubResource( 22 )
-material/0 = SubResource( 23 )
+mesh = SubResource( 24 )
+material/0 = SubResource( 25 )
 
 [node name="NosePoint" type="MeshInstance" parent="gliderpos/AeroCentre"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.59882 )
 cast_shadow = 0
-mesh = SubResource( 24 )
-material/0 = SubResource( 25 )
+mesh = SubResource( 26 )
+material/0 = SubResource( 27 )
 
 [node name="VelocityVector" type="MeshInstance" parent="gliderpos/AeroCentre/NosePoint"]
 cast_shadow = 0
-mesh = SubResource( 26 )
-material/0 = SubResource( 27 )
+mesh = SubResource( 28 )
+material/0 = SubResource( 29 )
 
 [node name="CollisionShape" type="CollisionShape" parent="gliderpos"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.687679, 0 )
