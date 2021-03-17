@@ -2,7 +2,7 @@ extends Node
 
 var S       = 13.7				# m^2 Puma area
 var stall	= deg2rad(11)		#Stall angle
-var c       = 1.9				# m Falcon 170
+var c       = 1				# m Falcon 170
 var Cmo     = 0.05
 var Scx     = 0.16				# S.Cx of the pilot position. If prone : Scx=0.16. If stood: Scx=0.66
 var g       = 9.81				# N/kg 
