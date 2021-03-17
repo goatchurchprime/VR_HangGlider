@@ -288,13 +288,13 @@ mesh = SubResource( 11 )
 material/0 = SubResource( 12 )
 
 [node name="TetherPoint" type="MeshInstance" parent="gliderpos/AeroCentre"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.161 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.3 )
 cast_shadow = 0
 mesh = SubResource( 13 )
 material/0 = SubResource( 14 )
 
 [node name="AframeBisector" type="MeshInstance" parent="gliderpos/AeroCentre/TetherPoint"]
-transform = Transform( 1, 0, 0, 0, 0.970296, 0.241922, 0, -0.241922, 0.970296, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0 )
 cast_shadow = 0
 mesh = SubResource( 15 )
 material/0 = SubResource( 16 )
