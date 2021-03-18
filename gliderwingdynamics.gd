@@ -2,7 +2,7 @@ extends Node
 
 var S       = 13.7				# m^2 Puma area
 var stall	= deg2rad(11)		#Stall angle
-var c       = 1				# m Falcon 170
+var c       = 1				# m Puma Chord
 var Cmo     = 0.05
 var Scx     = 0.16				# S.Cx of the pilot position. If prone : Scx=0.16. If stood: Scx=0.66
 var g       = 9.81				# N/kg 
@@ -28,7 +28,9 @@ func linearforce(airvelocity):
 		Cdg      = -0.3*alphacu + 0.73656*alphasq - 0.02*alpha + 0.03
 	else:
 		Clift    = -6.87*alphasq + 7.44*alpha - 0.161
-		Cdg      = 0.516*alphasq - 0.0314*alpha + 0.0261
+		Cdg      = 8.62*alphasq - 3.08*alpha + 0.325
+	Clift = clamp(Clift, -0.25, 2)
+	Cdg = clamp(Cdg, 0.01,0.5)
 
 	# resolution of the forces
 	var airspeed = clamp(airvelocity.length(), 0, 30)
@@ -42,6 +44,7 @@ func linearforce(airvelocity):
 	return avecLift*lift + avecDrag*Dcdg
 		
 var Dcount = 0
+
 func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, hvec):
 	var Clift 	= 0
 	var Cdg		= 0
@@ -51,23 +54,27 @@ func turningforce(airvelocity, wfrot, linearforce, CGtoACvec, hvec):
 		
 	var dyn    = 0.5*rho*vsq*S         # dynamic pressure
 	var Xw     = -hvec.dot(CGtoACvec)
+	var alpha  = -atan2(-airvelocity.y, -airvelocity.z)
+	alpha      = clamp(alpha, deg2rad(-35), deg2rad(35))
+	var alphasq= alpha*alpha
+	var alphacu = alpha*alphasq 
 
-	var Cmq  = -0.2
+	var Cmq  = -0.5*alpha - 0.1
 
 	# Damping due to relative camber and larger displacement of wing chords due to wing sweep
 	var Mq     = (Cmq*br*c*c*rho*airspeed*S)/4
 	
 	# Damping due to rotation of wing around the low centre of gravity
-	var alpha  = -atan2(-airvelocity.y, -airvelocity.z)
-	alpha      = clamp(alpha, deg2rad(-35), deg2rad(35))
-	var alphasq= alpha*alpha
-	var alphacu = alpha*alphasq 
+
+	
 	if alpha < stall:
 		Clift    = -0.75715*alphacu + 0.48844*alphasq + 4.7*alpha + 0.1
 		Cdg      = -0.3*alphacu + 0.73656*alphasq - 0.02*alpha + 0.03
 	else:
 		Clift    = -6.87*alphasq + 7.44*alpha - 0.161
-		Cdg      = 0.516*alphasq - 0.0314*alpha + 0.0261
+		Cdg      = 8.62*alphasq - 3.08*alpha + 0.325
+	Clift = clamp(Clift, -0.25, 2)
+	Cdg = clamp(Cdg, 0.01,0.5)
 
 	var d       = CGtoACvec.length()
 	var Mq2     = -0.5*rho*Cdg*S*(-2*br*d*d*airspeed + br*br*d*d*d)
