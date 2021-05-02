@@ -34,16 +34,17 @@ func _ready():
 var recarvrorigin = null
 var headcamoffset = Vector3(0,0,0)
 
-
 var altitudeshiftforPEcalc = 0
 
 func _process(delta):
 	if Input.is_action_just_pressed("ui_home") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.YB):
 		if recarvrorigin == null:
+			arvrorigin.rotation_degrees.y = -90
 			recarvrorigin = arvrorigin.global_transform.origin
 			headcamoffset = headcam.global_transform.origin - arvrorigin.global_transform.origin
 			#arvrorigin.global_transform.origin = $AeroCentre/TetherPoint/HangStrap/PilotBody/PilotHead.global_transform.origin - headcamoffset
 		else:
+			arvrorigin.rotation_degrees.y = 0
 			arvrorigin.global_transform.origin = recarvrorigin
 			recarvrorigin = null
 
@@ -53,7 +54,9 @@ func _process(delta):
 		linear_velocity = gliderdynamicstate.vvec
 			
 	if Input.is_action_just_pressed("ui_page_down") or pitchcontroller._button_just_pressed(vr.CONTROLLER_BUTTON.XA):
+		$gliderdynamicstate._init()
 		takeoffstart()
+
 
 var energytimewindow = 0.2
 var energytimer = 0.0
@@ -61,6 +64,7 @@ var prevtotalenergy = 0.0
 var sumdragenergy = 0.0
 var totalttime = 0
 var Nintegralsubsteps = 10
+var tieglidertopositionvelocity = false
 func _physics_process(delta):
 	var camvec = -headcam.global_transform.basis.z
 	if is_nan(camvec.x):
@@ -82,7 +86,6 @@ func _physics_process(delta):
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.x = -epsilon + $AeroCentre/TetherPoint/AframeBisector.rotation_degrees.x
 	$AeroCentre/TetherPoint/HangStrap.rotation_degrees.z = epsilonI
 	
-
 	if mode == RigidBody.MODE_KINEMATIC:
 		var deltasubstep = delta/Nintegralsubsteps
 		for i in Nintegralsubsteps:
@@ -92,7 +95,8 @@ func _physics_process(delta):
 			gliderdynamicstate.stepflight(deltasubstep, self)
 			sumdragenergy += deltasubstep*gliderdynamicstate.dragworkdone()
 
-		transform.origin = gliderorigin + gliderdynamicstate.vvec*0.1 # Vector3(0, gliderdynamicstate.vvec.y*0.1, 0)
+		if tieglidertopositionvelocity:
+			transform.origin = gliderorigin + gliderdynamicstate.vvec*0.1 # Vector3(0, gliderdynamicstate.vvec.y*0.1, 0)
 			
 		energytimer += delta
 		totalttime += delta
@@ -128,10 +132,10 @@ func _physics_process(delta):
 	if mode == RigidBody.MODE_RIGID:
 		pass
 	elif recarvrorigin == null:
-		if abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*3:
+		if abs(transform.origin.z - orgpos.z) > abs(orgpos.z)*4:
 			altitudeshiftforPEcalc += transform.origin.y - orgpos.y
 			transform.origin = orgpos
-	elif abs(transform.origin.x - orgpos.x) > abs(orgpos.x)*20:
+	elif abs(transform.origin.z - orgpos.z) > abs(orgpos.z)*40:
 		altitudeshiftforPEcalc += transform.origin.y - orgpos.y
 		transform.origin = orgpos
 		
