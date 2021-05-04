@@ -54,7 +54,7 @@ vr="*res://OQ_Toolkit/vr_autoload.gd"
 
 [gdnative]
 
-singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib", "res://pythonscript.gdnlib" ]
+singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
 
 [rendering]
 
